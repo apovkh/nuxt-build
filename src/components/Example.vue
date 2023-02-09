@@ -1,13 +1,15 @@
 <script setup lang="ts">
-
+defineProps<{
+  text: string
+}>()
 </script>
 
 <template>
-  <div class="c-home">
-    Home
+  <div>
+    {{ text }}
   </div>
 </template>
 
-<style lang="scss">
+<style scoped>
 
 </style>
