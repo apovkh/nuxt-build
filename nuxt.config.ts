@@ -1,7 +1,8 @@
 export default defineNuxtConfig({
 	srcDir: './src',
 	modules: [
-		'nuxt-windicss'
+		'nuxt-windicss',
+		'nuxt-vitest'
 	],
 	css: [
 		'vuetify/lib/styles/main.sass',
