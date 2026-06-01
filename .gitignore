@@ -5,4 +5,13 @@ node_modules
 .cache
 .output
 .env
+.env.*
+!.env.example
 dist
+coverage
+
+# Generated API docs (run `yarn docs`)
+docs
+
+# OS junk
+.DS_Store

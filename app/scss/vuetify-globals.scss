@@ -1,0 +1,11 @@
+@use 'vuetify' with (
+  $utilities: false,
+  $font-size-root: 0.875rem,
+  $color-pack: false,
+  $reset: false,
+  $border-radius-root: 8px,
+);
+
+:root {
+  --v-activated-opacity: 0.1;
+}

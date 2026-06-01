@@ -1,12 +1,9 @@
 {
-  // https://nuxt.com/docs/guide/concepts/typescript
+  // Path aliases (#shared, #domains, @mapping, @schema) are generated into
+  // ./.nuxt/tsconfig.json from `nuxt.config.ts` — do not redefine `paths` here,
+  // it would override Nuxt's mappings (#app, #imports, ...).
   "extends": "./.nuxt/tsconfig.json",
-  "include": [
-    "./src/**/*.ts",
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "./**/test/**/*.spec.ts"
-  ]
+  "compilerOptions": {
+    "types": ["vitest/globals"]
+  }
 }
