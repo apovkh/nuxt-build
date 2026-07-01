@@ -11,10 +11,16 @@ const examples = [
   { to: '/news-oneoff', title: 'One-off request', composable: 'useApi', note: 'без кешу, на вимогу' },
   { to: '/bookmarks', title: 'Mutation + invalidate', composable: 'useApiMutation', note: 'POST + автооновлення списку' },
 ]
+
+const forms = [
+  { to: '/form', title: 'Жива валідація', composable: 'useForm', note: 'клієнт + сервер (422)' },
+  { to: '/posts/create', title: 'Create post', composable: 'useForm + repo', note: 'addPost · валідація полів' },
+  { to: '/login', title: 'Login', composable: 'useForm + repo', note: 'login · токен у onSuccess' },
+]
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl p-6">
+  <div class="mx-auto max-w-[1600px] px-6 pb-6 pt-4">
     <h1 class="text-2xl font-bold">app/core — приклади data-fetching</h1>
     <p class="mt-1 text-sm">
       Кожна сторінка демонструє свій composable ядра для сценарію SSR true / false.
@@ -32,6 +38,23 @@ const examples = [
         </NuxtLink>
       </li>
     </ul>
+
+    <section class="mt-10">
+      <h2 class="text-lg font-semibold">Форми — <code>useForm</code></h2>
+      <p class="text-sm">Клієнтська валідація (rules) + серверна (422) в один <code>errors</code>.</p>
+      <ul class="mt-3 grid gap-3 sm:grid-cols-2">
+        <li v-for="form in forms" :key="form.to">
+          <NuxtLink
+            :to="form.to"
+            class="block rounded border border-border p-4 transition hover:border-primary"
+          >
+            <div class="font-medium">{{ form.title }}</div>
+            <code class="text-sm text-primary">{{ form.composable }}</code>
+            <div class="mt-1 text-xs">{{ form.note }}</div>
+          </NuxtLink>
+        </li>
+      </ul>
+    </section>
 
     <section class="mt-10">
       <h2 class="text-lg font-semibold">Native <code>useFetch</code> (SSR, без TanStack-кешу)</h2>

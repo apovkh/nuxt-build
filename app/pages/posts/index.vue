@@ -1,17 +1,37 @@
 <script setup lang="ts">
 import { listPosts } from '~/repositories/posts'
 
-// Той самий репозиторій, що й у формі — тепер як queryFn кешованого запиту.
+definePageMeta({
+  title: 'Posts — useClientQuery',
+  subtitle: 'Той самий репозиторій, що й у формі створення, тепер як queryFn кешованого запиту.',
+  maxWidth: 'max-w-[1600px]',
+  breadcrumbs: [
+    { title: 'Головна', to: '/' },
+    { title: 'Posts' },
+  ],
+})
+
 const { data: posts, isPending } = useClientQuery({
   queryKey: ['posts'],
   queryFn: listPosts,
 })
+
+usePageCode([
+  {
+    title: 'useClientQuery + repo',
+    code: `import { listPosts } from '~/repositories/posts'
+
+// той самий репозиторій, що й у формі — як queryFn
+const { data: posts, isPending } = useClientQuery({
+  queryKey: ['posts'],
+  queryFn: listPosts,
+})`,
+  },
+])
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="text-xl font-medium mb-4">Posts</h1>
-
+  <div>
     <p v-if="isPending">Завантаження…</p>
     <ul v-else class="space-y-2">
       <li v-for="post in posts" :key="post.id">

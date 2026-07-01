@@ -1,28 +1,40 @@
 <script setup lang="ts">
-// ── Приклад 2: клієнтський кеш (ssr: false) ───────────────────────────────────
-// Цей маршрут має routeRules: { '/news-spa': { ssr: false } } у nuxt.config,
-// тож на сервері він НЕ рендериться — початковий HTML порожній (немає даних для SEO).
-// useClientQuery = useQuery без onServerPrefetch + enabled: import.meta.client,
-// тому запит виконується ЛИШЕ у браузері після гідрації. Кеш повноцінний (ретраї,
-// invalidateQueries), просто наповнюється на клієнті. Типово для приватних SPA-екранів.
+definePageMeta({
+  title: 'Client cache — useClientQuery',
+  subtitle: 'ssr: false · у view-source даних немає — вони підвантажуються запитом у браузері (вкладка Network).',
+  maxWidth: 'max-w-[1600px]',
+  breadcrumbs: [
+    { title: 'Головна', to: '/' },
+    { title: 'Client cache' },
+  ],
+})
+
+// useClientQuery = useQuery без onServerPrefetch (+ enabled на клієнті):
+// запит ЛИШЕ у браузері після гідрації, кеш повноцінний.
 const news = useNewsRepository()
 const { data: articles, isPending, error } = useClientQuery(news.listQuery())
+
+usePageCode([
+  {
+    title: 'useClientQuery',
+    code: `// routeRules: { '/news-spa': { ssr: false } }
+const news = useNewsRepository()
+
+// useQuery без onServerPrefetch (+ enabled на клієнті):
+// запит лише у браузері, повноцінний кеш/ретраї/invalidate
+const { data: articles, isPending, error } = useClientQuery(
+  news.listQuery(),
+)`,
+  },
+])
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl p-6">
-    <NuxtLink to="/" class="text-sm text-primary hover:underline">← Home</NuxtLink>
+  <div>
+    <p v-if="isPending">Loading in the browser…</p>
+    <p v-else-if="error" class="text-error">{{ error.message }}</p>
 
-    <h1 class="mt-2 text-2xl font-bold">Client cache — <code>useClientQuery</code></h1>
-    <p class="mt-1 text-sm">
-      <code>ssr: false</code> · у <code>view-source:</code> даних немає — вони підвантажуються
-      запитом у браузері (див. вкладку Network).
-    </p>
-
-    <p v-if="isPending" class="mt-6">Loading in the browser…</p>
-    <p v-else-if="error" class="mt-6 text-error">{{ error.message }}</p>
-
-    <ul v-else class="mt-6 space-y-4">
+    <ul v-else class="space-y-4">
       <li v-for="article in articles" :key="article.article_id" class="rounded border border-border p-4">
         <h2 class="font-medium">{{ article.title }}</h2>
         <NuxtImg

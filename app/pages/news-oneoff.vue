@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import type { Article } from '#shared/types/news'
 
-// ── Приклад 3: разовий запит без кешу (useApi) ────────────────────────────────
-// useApi — тонка типізована обгортка над $api ($fetch з інтерсепторами). БЕЗ кешу,
-// БЕЗ SSR-payload. Підходить для дій «на вимогу»: експорт, перевірка, службовий виклик.
-// Стан (pending/error/data) керуємо руками — TanStack тут не задіяний.
+definePageMeta({
+  title: 'One-off request — useApi',
+  subtitle: 'Запит виконується лише за кліком, результат не кешується (перезавантаж сторінку — дані зникнуть).',
+  maxWidth: 'max-w-[1600px]',
+  breadcrumbs: [
+    { title: 'Головна', to: '/' },
+    { title: 'One-off request' },
+  ],
+})
+
+// useApi (під капотом репозиторію) — разовий запит без кешу й SSR-payload.
+// Стан (pending/error/data) керуємо руками — TanStack не задіяний.
 const news = useNewsRepository()
 
 const articles = ref<Article[]>([])
@@ -18,25 +26,41 @@ async function load() {
   try {
     articles.value = await news.getAll()
     loaded.value = true
-  } catch (e) {
+  }
+  catch (e) {
     error.value = (e as Error).message
-  } finally {
+  }
+  finally {
     pending.value = false
   }
 }
+
+usePageCode([
+  {
+    title: 'useApi',
+    code: `const news = useNewsRepository()
+
+const articles = ref<Article[]>([])
+const pending = ref(false)
+
+// useApi під капотом репозиторію — разовий запит без кешу
+async function load() {
+  pending.value = true
+  try {
+    articles.value = await news.getAll()
+  }
+  finally {
+    pending.value = false
+  }
+}`,
+  },
+])
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl p-6">
-    <NuxtLink to="/" class="text-sm text-primary hover:underline">← Home</NuxtLink>
-
-    <h1 class="mt-2 text-2xl font-bold">One-off request — <code>useApi</code></h1>
-    <p class="mt-1">
-      Запит виконується лише за кліком, результат не кешується (перезавантаж сторінку — дані зникнуть).
-    </p>
-
+  <div>
     <button
-      class="mt-6 rounded bg-primary px-4 py-2 text-white disabled:opacity-50"
+      class="rounded bg-primary px-4 py-2 text-white disabled:opacity-50"
       :disabled="pending"
       @click="load"
     >
@@ -44,7 +68,7 @@ async function load() {
     </button>
 
     <p v-if="error" class="mt-4 text-error">{{ error }}</p>
-    <p v-else-if="loaded && !articles.length">No articles.</p>
+    <p v-else-if="loaded && !articles.length" class="mt-4">No articles.</p>
 
     <ul class="mt-6 space-y-2">
       <li v-for="article in articles" :key="article.article_id" class="rounded border border-border p-3">

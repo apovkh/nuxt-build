@@ -15,6 +15,10 @@ export default defineNuxtConfig(
 
       modules: ['@nuxt/image', '@nuxtjs/tailwindcss'],
 
+      // Проектна папка компонентів. Ядро задає свою ~/core/components і цим заміщує дефолт,
+      // тож ~/components повертаємо тут; defu сконкатенує обидві.
+      components: ['~/components'],
+
       // Проектні data-access репозиторії. Шлях відносно srcDir (app/) → app/repositories.
       // defu конкатенує з ядровими imports.dirs, тож use*Repository auto-import'яться.
       imports: { dirs: ['repositories'] },

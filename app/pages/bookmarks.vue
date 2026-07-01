@@ -1,8 +1,15 @@
 <script setup lang="ts">
-// ── Приклад 4: мутація + автоінвалідація (useApiMutation) ─────────────────────
-// Читання і мутація йдуть через useBookmarksRepository (app/repositories):
-// list() → queryOptions для useClientQuery; create → mutationFn для useApiMutation.
-// Після успіху invalidate: [['bookmarks']] автоматично рефетчить список.
+definePageMeta({
+  title: 'Mutation + invalidate — useApiMutation',
+  subtitle: 'Додай закладку → список оновиться автоматично через invalidate: [[\'bookmarks\']]. Стор in-memory, лише для демо.',
+  maxWidth: 'max-w-[1600px]',
+  breadcrumbs: [
+    { title: 'Головна', to: '/' },
+    { title: 'Mutation + invalidate' },
+  ],
+})
+
+// Читання і мутація — через useBookmarksRepository. Після успіху invalidate рефетчить список.
 const bookmarksRepo = useBookmarksRepository()
 
 const { data: bookmarks, isPending } = useClientQuery(bookmarksRepo.listQuery())
@@ -21,19 +28,27 @@ function submit() {
   const value = title.value.trim()
   if (value) add({ title: value })
 }
+
+usePageCode([
+  {
+    title: 'useApiMutation',
+    code: `const repo = useBookmarksRepository()
+
+// читання — кешований запит
+const { data: bookmarks } = useClientQuery(repo.listQuery())
+
+// мутація + автоінвалідація списку після успіху
+const { mutate: add, isPending } = useApiMutation({
+  mutationFn: repo.create,
+  invalidate: [['bookmarks']],
+})`,
+  },
+])
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl p-6">
-    <NuxtLink to="/" class="text-sm text-primary hover:underline">← Home</NuxtLink>
-
-    <h1 class="mt-2 text-2xl font-bold">Mutation + invalidate — <code>useApiMutation</code></h1>
-    <p class="mt-1 text-sm">
-      Додай закладку → список оновиться автоматично через <code>invalidate: [['bookmarks']]</code>.
-      Стор — in-memory (скидається при рестарті сервера), лише для демо.
-    </p>
-
-    <form class="mt-6 flex gap-2" @submit.prevent="submit">
+  <div>
+    <form class="flex gap-2" @submit.prevent="submit">
       <input
         v-model="title"
         placeholder="Bookmark title"
