@@ -60,3 +60,25 @@ export default defineNuxtConfig(
 | Зміна даних на бекенді | `useApiMutation` |
 | Разові дані без кешу (просто запит) | `useApi` |
 | Форма з валідацією | `useForm` |
+| Обробка помилок API (локально) | `useApiError` |
+
+## Обробка помилок — три рівні
+
+1. **Транспорт** (`plugins/api.ts`) — `onResponseError`: 401 → редірект на `/login`.
+2. **Глобально** (`plugins/vue-query.ts`) — `QueryCache`/`MutationCache` `onError` шлють
+   усі помилки запитів/мутацій у `handleGlobalApiError` (лог + нотифікація). Нуль коду
+   на кожен виклик. `useApi` теж маршрутизується туди.
+3. **Локально** (`useApiError`) — інлайн-помилки у формах/компонентах.
+
+Підключення тосту проекту (один раз):
+
+```ts
+import { setApiErrorNotifier } from '~/core/utils/handleApiError'
+setApiErrorNotifier((e) => useNuxtApp().$toast.error(e.message))
+```
+
+Замовкнути конкретний запит для глобального нотифаєра:
+
+```ts
+useClientQuery({ queryKey: ['x'], queryFn, meta: { silent: true } })
+```

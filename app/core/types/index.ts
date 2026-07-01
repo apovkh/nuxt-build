@@ -12,15 +12,16 @@ export interface Paginated<T> {
   pageSize: number
 }
 
-// Типізація $api, який додає плагін core/plugins/api.ts
+// Транспорт ядра, який додає плагін core/plugins/api.ts.
+// $api (структурований SDK) типізується на рівні проекту — див. app/types.
 declare module '#app' {
   interface NuxtApp {
-    $api: typeof $fetch
+    $http: typeof $fetch
   }
 }
 declare module 'vue' {
   interface ComponentCustomProperties {
-    $api: typeof $fetch
+    $http: typeof $fetch
   }
 }
 

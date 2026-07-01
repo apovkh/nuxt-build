@@ -1,60 +1,55 @@
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref } from 'vue'
+import { FetchError } from 'ofetch'
+import { ruleToText } from '~/core/utils/ruleToText'
+import { handleGlobalApiError } from '~/core/utils/handleApiError'
 
-type Errors<T> = Partial<Record<keyof T, string | undefined>>
+// Формат помилок валідації бекенду (422): [ [field, rule, params], ... ]
+export type ValidationErrors = Array<[string, string, Array<number | string>]>
 
-interface UseFormOptions<T extends Record<string, any>> {
-  initial: T
-  /** Повертає map помилок { field: 'текст' | undefined }. Викликається на submit і після blur. */
-  validate?: (values: T) => Errors<T>
-  onSubmit: (values: T) => void | Promise<void>
-}
+export default function useForm<
+  TFormData extends Record<string, unknown>,
+  TApiResult,
+>(
+  apiFn: (args: TFormData) => Promise<TApiResult>,
+  formData: TFormData,
+  onSuccess?: (res: TApiResult) => void,
+) {
+  const form = reactive(formData) as TFormData
+  const errors = ref<Partial<Record<keyof TFormData, string>>>({})
+  const pending = ref(false)
+  const success = ref(false)
 
-// Власний легкий form-composable без залежностей.
-// Реактивні values/errors/touched, валідація on-submit + on-blur, isSubmitting під час запиту.
-export function useForm<T extends Record<string, any>>(opts: UseFormOptions<T>) {
-  const values = reactive({ ...opts.initial }) as T
-  const errors = ref<Errors<T>>({})
-  const touched = ref<Partial<Record<keyof T, boolean>>>({})
-  const isSubmitting = ref(false)
+  async function send() {
+    errors.value = {}
+    pending.value = true
+    success.value = false
 
-  function runValidate(): boolean {
-    errors.value = opts.validate ? opts.validate(values) : {}
-    return Object.values(errors.value).every((e) => !e)
-  }
-
-  const isValid = computed(() => Object.values(errors.value).every((e) => !e))
-
-  function setFieldValue<K extends keyof T>(key: K, val: T[K]) {
-    values[key] = val
-    if (touched.value[key]) runValidate()
-  }
-
-  function handleBlur<K extends keyof T>(key: K) {
-    touched.value[key] = true
-    runValidate()
-  }
-
-  async function handleSubmit() {
-    // позначаємо всі поля як touched, щоб показати всі помилки
-    touched.value = Object.keys(values).reduce((acc, k) => {
-      acc[k as keyof T] = true
-      return acc
-    }, {} as Partial<Record<keyof T, boolean>>)
-
-    if (!runValidate()) return
-    isSubmitting.value = true
     try {
-      await opts.onSubmit(values)
-    } finally {
-      isSubmitting.value = false
+      const res = await apiFn(form)
+      success.value = true
+      onSuccess?.(res)
+    }
+    catch (e) {
+      const status = e instanceof FetchError ? (e.statusCode ?? e.response?.status) : undefined
+
+      if (e instanceof FetchError && status === 422) {
+        // помилки валідації → по полях (специфічно для форми)
+        const list = e.data as ValidationErrors
+        list?.forEach(([field, rule, params]) => {
+          if (field in form) {
+            errors.value[field as keyof TFormData] = ruleToText(rule, params)
+          }
+        })
+      }
+      else {
+        // все інше (500/мережа/таймаут) → глобальний обробник (тост/лог), не дублюємо у формі
+        handleGlobalApiError(e)
+      }
+    }
+    finally {
+      pending.value = false
     }
   }
 
-  function reset() {
-    Object.assign(values, opts.initial)
-    errors.value = {}
-    touched.value = {}
-  }
-
-  return { values, errors, touched, isSubmitting, isValid, setFieldValue, handleBlur, handleSubmit, reset }
+  return { form, errors, pending, success, send }
 }
