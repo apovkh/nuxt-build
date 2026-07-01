@@ -1,11 +1,11 @@
 import { ref, computed } from 'vue'
 import type { ApiError } from '~/core/types'
 
-// Нормалізує будь-яку помилку ($fetch/ofetch FetchError, Error, невідоме) у єдину форму ApiError.
+// Normalizes any error ($fetch/ofetch FetchError, Error, unknown) into a single ApiError shape.
 export function normalizeApiError(err: unknown): ApiError {
   const e = err as any
 
-  // ofetch/$fetch FetchError: має statusCode, data (розпарсене тіло відповіді), response
+  // ofetch/$fetch FetchError: has statusCode, data (parsed response body), response
   if (e?.response || e?.statusCode) {
     return {
       statusCode: e.statusCode ?? e.response?.status ?? 0,
@@ -21,7 +21,7 @@ export function normalizeApiError(err: unknown): ApiError {
   return { statusCode: 0, message: 'Невідома помилка' }
 }
 
-// Реактивна обробка помилок API для компонентів/форм.
+// Reactive API error handling for components/forms.
 // const { error, isError, message, handleError, resetError, isUnauthorized } = useApiError()
 export function useApiError() {
   const error = ref<ApiError | null>(null)
@@ -30,14 +30,14 @@ export function useApiError() {
   const message = computed(() => error.value?.message ?? '')
   const status = computed(() => error.value?.statusCode ?? null)
 
-  // Статус-хелпери для типової розгалуженої логіки
+  // Status helpers for common branching logic
   const isUnauthorized = computed(() => status.value === 401)
   const isForbidden = computed(() => status.value === 403)
   const isNotFound = computed(() => status.value === 404)
   const isValidation = computed(() => status.value === 422)
   const isServerError = computed(() => (status.value ?? 0) >= 500)
 
-  // Прийняти помилку, зберегти в стані й повернути нормалізовану форму
+  // Accept an error, store it in state, and return the normalized shape
   function handleError(err: unknown): ApiError {
     const normalized = normalizeApiError(err)
     error.value = normalized

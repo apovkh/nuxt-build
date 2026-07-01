@@ -1,7 +1,7 @@
 import type { $Fetch } from 'ofetch'
 
-// Фабрика транспорту: $fetch-інстанс з інтерсепторами.
-// Використовується і ядром ($http), і проектним SDK ($api) — один набір інтерсепторів на всіх.
+// Transport factory: a $fetch instance with interceptors.
+// Used by both the core ($http) and the project SDK ($api) — one set of interceptors for all.
 export function createHttp(): $Fetch {
   const config = useRuntimeConfig()
 

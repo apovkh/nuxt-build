@@ -1,8 +1,8 @@
-/* Self-hosted шрифти. Поклади .woff2 у app/core/tokens/fonts/. */
+/* Self-hosted fonts. Drop .woff2 files into app/core/tokens/fonts/. */
 @font-face {
   font-family: 'Inter';
   font-style: normal;
-  font-weight: 400 500; /* variable range; для статичних — окремі @font-face */
+  font-weight: 400 500; /* variable range; for static fonts use separate @font-face rules */
   font-display: swap;
   src: url('./fonts/Inter-Variable.woff2') format('woff2');
 }

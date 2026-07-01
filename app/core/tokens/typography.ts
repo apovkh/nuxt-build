@@ -1,4 +1,4 @@
-// Джерело правди для типографіки. Споживається Tailwind і Vuetify.
+// Source of truth for typography. Consumed by Tailwind and Vuetify.
 export const typography = {
   fontFamily: {
     sans: "'Inter', system-ui, sans-serif",
@@ -18,7 +18,7 @@ export const typography = {
   },
 } as const
 
-// Геометрія (радіуси тощо) — тримаємо тут, щоб теж було одним джерелом.
+// Geometry (radii, etc.) — kept here so it's a single source too.
 export const layout = {
   radius: '8px',
 } as const

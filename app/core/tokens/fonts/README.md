@@ -1,12 +1,12 @@
-# Шрифти
+# Fonts
 
-Поклади сюди self-hosted шрифти у форматі `.woff2`.
+Drop self-hosted fonts here in `.woff2` format.
 
-За замовчуванням `../fonts.css` очікує файл:
+By default `../fonts.css` expects the file:
 
 ```
 Inter-Variable.woff2
 ```
 
-Якщо міняєш шрифт — заміни файл, онови `@font-face` у `../fonts.css`
-та `typography.fontFamily` у `../typography.ts`.
+If you change the font — replace the file, update `@font-face` in `../fonts.css`
+and `typography.fontFamily` in `../typography.ts`.

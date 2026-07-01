@@ -4,14 +4,14 @@ import { normalizeApiError } from '~/core/composables/useApiError'
 type Notifier = (e: ApiError) => void
 let notifier: Notifier | null = null
 
-// Проект підключає свій тост/нотифікацію ОДИН раз (напр. у плагіні після ініціалізації UI):
+// The project wires up its own toast/notification ONCE (e.g. in a plugin after UI init):
 //   setApiErrorNotifier((e) => useNuxtApp().$toast.error(e.message))
 export function setApiErrorNotifier(fn: Notifier) {
   notifier = fn
 }
 
-// Єдина точка обробки помилок API. Нормалізує → логує → нотифікує.
-// Викликається глобально з TanStack cache і з useApi. opts.silent вимикає нотифікацію.
+// Single entry point for API error handling. Normalizes → logs → notifies.
+// Called globally from the TanStack cache and from useApi. opts.silent disables the notification.
 export function handleGlobalApiError(err: unknown, opts?: { silent?: boolean }): ApiError {
   const e = normalizeApiError(err)
 

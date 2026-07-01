@@ -1,4 +1,4 @@
-// Спільні типи ядра.
+// Shared core types.
 export interface ApiError {
   statusCode: number
   message: string
@@ -12,8 +12,8 @@ export interface Paginated<T> {
   pageSize: number
 }
 
-// Транспорт ядра, який додає плагін core/plugins/api.ts.
-// $api (структурований SDK) типізується на рівні проекту — див. app/types.
+// Core transport provided by the core/plugins/api.ts plugin.
+// $api (the structured SDK) is typed at the project level — see app/types.
 declare module '#app' {
   interface NuxtApp {
     $http: typeof $fetch

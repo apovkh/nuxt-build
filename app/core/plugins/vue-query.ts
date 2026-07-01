@@ -10,9 +10,9 @@ import {
 } from '@tanstack/vue-query'
 import { handleGlobalApiError } from '~/core/utils/handleApiError'
 
-// TanStack Query init + SSR-hydration + ГЛОБАЛЬНА обробка помилок.
-// Усі запити/мутації (use*Query, useApiMutation) автоматично проходять через handleGlobalApiError.
-// Щоб замовкнути конкретний запит — передай meta: { silent: true } у його опції.
+// TanStack Query init + SSR hydration + GLOBAL error handling.
+// All queries/mutations (use*Query, useApiMutation) automatically go through handleGlobalApiError.
+// To silence a specific query — pass meta: { silent: true } in its options.
 export default defineNuxtPlugin((nuxt) => {
   const vueQueryState = useState<DehydratedState | null>('vue-query')
 

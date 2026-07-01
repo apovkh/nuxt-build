@@ -1,11 +1,11 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
 
-// Клієнтський кеш. Для SPA-адмінки: без onServerPrefetch запит на сервері не виконується,
-// а enabled на клієнті гарантує, що queryFn не смикнеться під час SSR.
+// Client-side cache. For an SPA admin panel: without onServerPrefetch the query doesn't run on the server,
+// and enabling it only on the client guarantees queryFn won't fire during SSR.
 export function useClientQuery<T>(options: UseQueryOptions<T>) {
   return useQuery({
     ...options,
-    // якщо options.enabled — ref/getter, за потреби огорни його самостійно у проекті
+    // if options.enabled is a ref/getter, wrap it yourself in the project as needed
     enabled: import.meta.client && ((options.enabled as boolean) ?? true),
   })
 }

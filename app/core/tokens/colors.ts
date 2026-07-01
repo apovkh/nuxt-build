@@ -1,6 +1,6 @@
-// Джерело правди для кольорів. Споживається Tailwind і Vuetify-темою з одного місця.
-// Ключі узгоджені з Vuetify theme.colors (primary/secondary/surface/background/error/info/
-// success/warning), тож підключаються напряму без мапінгу.
+// Source of truth for colors. Consumed by Tailwind and the Vuetify theme from one place.
+// Keys align with Vuetify theme.colors (primary/secondary/surface/background/error/info/
+// success/warning), so they plug in directly without mapping.
 export const colors = {
   primary: '#2563eb',
   secondary: '#64748b',
@@ -10,7 +10,7 @@ export const colors = {
   info: '#0ea5e9',
   success: '#16a34a',
   warning: '#f59e0b',
-  // додаткові (поза стандартом Vuetify)
+  // extra (outside the Vuetify standard)
   muted: '#f1f5f9',
   border: '#e2e8f0',
 } as const

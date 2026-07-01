@@ -1,7 +1,7 @@
 import type { $Fetch } from 'ofetch'
 
-// Доступ до транспорту ядра ($http — raw fetch з інтерсепторами), який дає плагін core/plugins/api.ts.
-// Використовується всередині репозиторіїв, щоб компонент не тягнув useNuxtApp сам.
+// Access to the core transport ($http — raw fetch with interceptors) provided by the core/plugins/api.ts plugin.
+// Used inside repositories so a component doesn't have to call useNuxtApp itself.
 export function useHttp(): $Fetch {
   return useNuxtApp().$http
 }

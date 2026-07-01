@@ -1,35 +1,35 @@
-# app/core — ядро проекту
+# app/core — project core
 
-Базові функції, конфіг і дизайн-токени, які переиспользуються по всьому застосунку.
-Структура повторює конвенції Nuxt, тож за потреби ядро легко піднімається в окремий layer.
+Base utilities, config, and design tokens reused across the whole app.
+The structure mirrors Nuxt conventions, so the core can easily be promoted to a separate layer when needed.
 
-## Структура
+## Structure
 
 ```
 app/core/
-├─ nuxt.core.config.ts   # Nuxt-налаштування ядра (imports/plugins/css/tailwind)
-├─ tailwind.config.ts    # тягне кольори/типографіку з tokens/
+├─ nuxt.core.config.ts   # core Nuxt settings (imports/plugins/css/tailwind)
+├─ tailwind.config.ts    # pulls colors/typography from tokens/
 ├─ composables/          # useApi, useApiMutation, useClientQuery, useServerQuery, useForm
-├─ plugins/              # api.ts ($fetch-клієнт), vue-query.ts (TanStack + SSR)
-├─ utils/config.ts       # coreConfig — рантайм-дефолти (staleTime, timeout, polling)
-├─ components/           # базові UI (BaseButton, …)
-├─ tokens/               # ДЖЕРЕЛО ПРАВДИ: colors.ts, typography.ts, index.ts (Vuetify+Tailwind)
+├─ plugins/              # api.ts ($fetch client), vue-query.ts (TanStack + SSR)
+├─ utils/config.ts       # coreConfig — runtime defaults (staleTime, timeout, polling)
+├─ components/           # base UI (empty — add as needed)
+├─ tokens/               # SOURCE OF TRUTH: colors.ts, typography.ts, index.ts (Vuetify+Tailwind)
 │  ├─ fonts.css, main.css
 │  └─ fonts/             # self-hosted .woff2
-└─ types/                # спільні типи + типізація $api
+└─ types/                # shared types + $api typing
 ```
 
-## Підключення в кореневому nuxt.config
+## Wiring into the root nuxt.config
 
 ```ts
-// nuxt.config.ts (корінь проекту)
+// nuxt.config.ts (project root)
 import { defu } from 'defu'
 import { coreNuxtConfig } from './app/core/nuxt.core.config'
 
 export default defineNuxtConfig(
   defu(
     {
-      // проектні налаштування
+      // project settings
       modules: ['@nuxtjs/tailwindcss'],
       runtimeConfig: {
         public: {
@@ -37,47 +37,47 @@ export default defineNuxtConfig(
         },
       },
     },
-    coreNuxtConfig, // база — другим аргументом; defu глибоко мержить і конкатенує масиви
+    coreNuxtConfig, // base — as the second argument; defu deep-merges and concatenates arrays
   ),
 )
 ```
 
-`defu` (йде разом з Nuxt) мержить конфіги глибоко й **конкатенує** масиви (`css`, `plugins`,
-`components`), тож ядрові та проектні значення складаються, а не перезатираються.
+`defu` (ships with Nuxt) merges configs deeply and **concatenates** arrays (`css`, `plugins`,
+`components`), so core and project values add up instead of overwriting each other.
 
-## Порядок плагінів
+## Plugin order
 
-Якщо ядрові плагіни (`api`, `vue-query`) мають ініціалізуватись до проектних —
-постав `coreNuxtConfig` першим аргументом `defu(coreNuxtConfig, {...})`
-або додай плагінам `enforce: 'pre'`.
+If the core plugins (`api`, `vue-query`) must initialize before the project ones —
+put `coreNuxtConfig` as the first argument `defu(coreNuxtConfig, {...})`
+or add `enforce: 'pre'` to the plugins.
 
-## Шпаргалка вибору composable
+## Composable cheat sheet
 
-| Потреба | Composable |
+| Need | Composable |
 |---|---|
-| SSR-сторінка з кешем | `useServerQuery` |
-| SPA-адмінка з кешем | `useClientQuery` |
-| Зміна даних на бекенді | `useApiMutation` |
-| Разові дані без кешу (просто запит) | `useApi` |
-| Форма з валідацією | `useForm` |
-| Обробка помилок API (локально) | `useApiError` |
+| SSR page with cache | `useServerQuery` |
+| SPA admin panel with cache | `useClientQuery` |
+| Changing data on the backend | `useApiMutation` |
+| One-off data without cache (just a request) | `useApi` |
+| Form with validation | `useForm` |
+| API error handling (locally) | `useApiError` |
 
-## Обробка помилок — три рівні
+## Error handling — three levels
 
-1. **Транспорт** (`plugins/api.ts`) — `onResponseError`: 401 → редірект на `/login`.
-2. **Глобально** (`plugins/vue-query.ts`) — `QueryCache`/`MutationCache` `onError` шлють
-   усі помилки запитів/мутацій у `handleGlobalApiError` (лог + нотифікація). Нуль коду
-   на кожен виклик. `useApi` теж маршрутизується туди.
-3. **Локально** (`useApiError`) — інлайн-помилки у формах/компонентах.
+1. **Transport** (`plugins/api.ts`) — `onResponseError`: 401 → redirect to `/login`.
+2. **Globally** (`plugins/vue-query.ts`) — `QueryCache`/`MutationCache` `onError` send
+   all query/mutation errors to `handleGlobalApiError` (log + notification). Zero code
+   per call. `useApi` is routed there too.
+3. **Locally** (`useApiError`) — inline errors in forms/components.
 
-Підключення тосту проекту (один раз):
+Wiring up the project toast (once):
 
 ```ts
 import { setApiErrorNotifier } from '~/core/utils/handleApiError'
 setApiErrorNotifier((e) => useNuxtApp().$toast.error(e.message))
 ```
 
-Замовкнути конкретний запит для глобального нотифаєра:
+Silence a specific query for the global notifier:
 
 ```ts
 useClientQuery({ queryKey: ['x'], queryFn, meta: { silent: true } })

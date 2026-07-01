@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/vue-query'
 
-// Мутації (POST/PUT/PATCH/DELETE) + автоматична інвалідація кешу після успіху.
-// invalidate — список queryKey, які треба оновити (напр. [['exams']]).
+// Mutations (POST/PUT/PATCH/DELETE) + automatic cache invalidation on success.
+// invalidate — list of queryKeys to refresh (e.g. [['exams']]).
 export function useApiMutation<TData, TVars>(
   options: UseMutationOptions<TData, Error, TVars> & { invalidate?: unknown[][] },
 ) {

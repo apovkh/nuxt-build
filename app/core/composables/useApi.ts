@@ -1,8 +1,8 @@
 import { handleGlobalApiError } from '~/core/utils/handleApiError'
 
-// ⚠️ ПРОСТО запит — без кешу, без TanStack, без SSR-payload.
-// Пряма обгортка над транспортом ядра ($http) для разових викликів за URL.
-// Помилки маршрутизуються в глобальний обробник і прокидаються далі (для локальної обробки).
+// ⚠️ JUST a request — no cache, no TanStack, no SSR payload.
+// A thin wrapper over the core transport ($http) for one-off calls by URL.
+// Errors are routed to the global handler and re-thrown (for local handling).
 export async function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]) {
   const { $http } = useNuxtApp()
   try {
