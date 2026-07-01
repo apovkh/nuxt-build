@@ -2,76 +2,16 @@
   "name": "nuxt-build",
   "type": "module",
   "private": true,
-  "packageManager": "yarn@1.22.22",
-  "imports": {
-    "#tailwind": "./app/scss/tailwind.css"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
   "scripts": {
-    "dev": "nuxt dev --port 3001",
-    "dev:local": "NUXT_PUBLIC_API_BASE=http://localhost:8080 nuxt dev --port 3001",
-    "build": "nuxt generate",
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "start": "node .output/server/index.mjs",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "typecheck": "vue-tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "schema": "openapi-typescript ./openapi.yaml -o ./app/shared/types/schema.ts",
-    "docs": "tsx scripts/docs/index.ts",
-    "docs:open": "tsx scripts/docs/index.ts && open docs/index.html",
-    "docs:v2": "tsx scripts/docs/index.ts --folder=v2 --out=docs/v2 && open docs/v2/index.html",
-    "docs:app": "tsx scripts/docs/index.ts --folder=app --out=docs/app && open docs/app/index.html",
-    "postinstall": "nuxt prepare",
-    "prepare": "husky"
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@iconify-json/mdi": "^1.2.3",
-    "@intlify/unplugin-vue-i18n": "^11.2.0",
-    "@mdi/js": "^7.4.47",
-    "@nuxt/icon": "^2.2.2",
-    "@nuxt/image": "^2.0.0",
-    "@nuxt/schema": "^4.4.5",
-    "@pinia/nuxt": "^0.11.3",
-    "@tailwindcss/postcss": "^4.3.0",
-    "@tanstack/vue-query": "^5.100.10",
-    "@vueuse/core": "^14.3.0",
-    "nuxt": "^4.4.5",
-    "pinia": "^3.0.4",
-    "tailwind-scrollbar": "^4.0.2",
-    "tailwindcss": "^4.3.0",
-    "vue": "^3.5.34",
-    "vue-i18n": "^11.4.2",
-    "vue-router": "latest",
-    "vuetify": "^4.0.7",
-    "vuetify-nuxt-module": "^0.19.5"
-  },
-  "devDependencies": {
-    "@antfu/eslint-config": "^9.0.0",
-    "@nuxt/eslint": "^1.15.2",
-    "@nuxt/test-utils": "^4.0.3",
-    "@tanstack/vue-query-devtools": "^6.1.29",
-    "@types/node": "^25.7.0",
-    "@vitest/coverage-v8": "^4.1.6",
-    "@vue/test-utils": "^2.4.10",
-    "eslint": "^10.3.0",
-    "eslint-plugin-import-x": "^4.16.2",
-    "fast-glob": "^3.3.3",
-    "happy-dom": "^20.9.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.0.4",
-    "openapi-typescript": "^7.13.0",
-    "sass": "^1.99.0",
-    "tsx": "^4.22.0",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.6",
-    "vue-tsc": "^3.2.9"
-  },
-  "lint-staged": {
-    "*.{js,ts,vue,json,jsonc,json5,md,yml,yaml}": "eslint --fix"
+    "nuxt": "^4.4.8",
+    "vue": "^3.5.38",
+    "vue-router": "^5.1.0"
   }
 }
