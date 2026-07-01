@@ -5,11 +5,11 @@ import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/
 export function useApiMutation<TData, TVars>(
   options: UseMutationOptions<TData, Error, TVars> & { invalidate?: unknown[][] },
 ) {
-  const qc = useQueryClient()
+  const queryClient = useQueryClient()
   return useMutation({
     ...options,
     onSuccess: (data, vars, ctx) => {
-      options.invalidate?.forEach((key) => qc.invalidateQueries({ queryKey: key }))
+      options.invalidate?.forEach((key) => queryClient.invalidateQueries({ queryKey: key }))
       options.onSuccess?.(data, vars, ctx)
     },
   })

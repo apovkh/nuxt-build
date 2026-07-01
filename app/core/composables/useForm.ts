@@ -30,25 +30,25 @@ export default function useForm<
     const rulesForField = fieldRules?.[name]
     if (!rulesForField) return true
 
-    const msgs: string[] = []
+    const messages: string[] = []
     for (const rule of rulesForField) {
-      const res = rule(form[name])
-      if (res !== true) msgs.push(res)
+      const result = rule(form[name])
+      if (result !== true) messages.push(result)
     }
 
-    if (msgs.length) errors.value[name] = msgs
+    if (messages.length) errors.value[name] = messages
     else delete errors.value[name]
 
-    return msgs.length === 0
+    return messages.length === 0
   }
 
   function validateAll(): boolean {
     if (!fieldRules) return true
-    let ok = true
+    let isValid = true
     for (const name of Object.keys(fieldRules) as (keyof TFormData)[]) {
-      if (!validateField(name)) ok = false
+      if (!validateField(name)) isValid = false
     }
-    return ok
+    return isValid
   }
 
   async function send() {
@@ -60,17 +60,17 @@ export default function useForm<
     success.value = false
 
     try {
-      const res = await apiFn(form)
+      const result = await apiFn(form)
       success.value = true
-      onSuccess?.(res)
+      onSuccess?.(result)
     }
-    catch (e) {
-      const status = e instanceof FetchError ? (e.statusCode ?? e.response?.status) : undefined
+    catch (error) {
+      const status = error instanceof FetchError ? (error.statusCode ?? error.response?.status) : undefined
 
       // 2) server-side validation (422) — same errors map, same messages
-      if (e instanceof FetchError && status === 422) {
-        const list = e.data as ValidationErrors
-        list?.forEach(([field, rule, params]) => {
+      if (error instanceof FetchError && status === 422) {
+        const validationErrors = error.data as ValidationErrors
+        validationErrors?.forEach(([field, rule, params]) => {
           if (field in form) {
             errors.value[field as keyof TFormData] = [tValidation(rule, params)]
           }
@@ -78,7 +78,7 @@ export default function useForm<
       }
       else {
         // 3) everything else → global handler (toast/log)
-        handleGlobalApiError(e)
+        handleGlobalApiError(error)
       }
     }
     finally {

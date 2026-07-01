@@ -2,20 +2,20 @@ import { ref, computed } from 'vue'
 import type { ApiError } from '~/core/types'
 
 // Normalizes any error ($fetch/ofetch FetchError, Error, unknown) into a single ApiError shape.
-export function normalizeApiError(err: unknown): ApiError {
-  const e = err as any
+export function normalizeApiError(error: unknown): ApiError {
+  const err = error as any
 
   // ofetch/$fetch FetchError: has statusCode, data (parsed response body), response
-  if (e?.response || e?.statusCode) {
+  if (err?.response || err?.statusCode) {
     return {
-      statusCode: e.statusCode ?? e.response?.status ?? 0,
-      message: e.data?.message ?? e.statusMessage ?? e.message ?? 'Помилка запиту',
-      data: e.data,
+      statusCode: err.statusCode ?? err.response?.status ?? 0,
+      message: err.data?.message ?? err.statusMessage ?? err.message ?? 'Помилка запиту',
+      data: err.data,
     }
   }
 
-  if (e instanceof Error) {
-    return { statusCode: 0, message: e.message }
+  if (err instanceof Error) {
+    return { statusCode: 0, message: err.message }
   }
 
   return { statusCode: 0, message: 'Невідома помилка' }
