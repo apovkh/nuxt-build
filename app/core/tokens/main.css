@@ -1,0 +1,6 @@
+/* Точка входу стилів ядра. Підключається у nuxt.core.config.ts → css. */
+@import './fonts.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
