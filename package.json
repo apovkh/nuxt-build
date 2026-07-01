@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@nuxt/image": "2.0.0",
+    "@tanstack/vue-query": "^5.62.0",
     "nuxt": "^4.4.8",
     "vue": "^3.5.38",
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.2",
     "@types/node": "^26.0.1"
   }
 }

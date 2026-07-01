@@ -15,8 +15,10 @@ project/
 │  │  ├─ useServerQuery.ts     # SSR + кеш
 │  │  ├─ useClientQuery.ts     # клієнтський кеш
 │  │  ├─ useApiMutation.ts     # мутації + інвалідація
-│  │  ├─ useApi.ts             # ПРОСТО запит: разовий виклик без кешу (не TanStack)
-│  │  └─ queries/              # queryOptions по доменах
+│  │  └─ useApi.ts             # ПРОСТО запит: разовий виклик без кешу (не TanStack)
+│  ├─ repositories/            # клієнтський data-access: use<Domain>Repository()
+│  │  ├─ useNewsRepository.ts       #   listQuery() → queryOptions (read) + getAll() (raw)
+│  │  └─ useBookmarksRepository.ts  #   listQuery() + create() (мутація)
 │  ├─ plugins/
 │  │  ├─ vue-query.ts          # TanStack init + hydration
 │  │  └─ api.ts                # $fetch-інстанс з інтерсепторами
@@ -24,6 +26,10 @@ project/
 │  │  └─ config.ts             # єдина точка дефолтів (див. §1)
 │  └─ types/
 └─ server/
+   ├─ api/                     # тонкі Nitro-роути: читають config, делегують
+   │  └─ news.get.ts
+   └─ repositories/            # серверний data-access: зовнішні API/БД/секрети
+      └─ newsRepository.ts     #   (реєструється в nitro.imports.dirs)
 ```
 
 ---
@@ -200,13 +206,24 @@ export function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]) {
 ```
 
 ```ts
-// app/composables/queries/example.ts — пресет queryOptions
+// app/repositories/useItemsRepository.ts — data-access ресурсу (read + write)
+// Теку app/repositories треба додати в imports.dirs (auto-import), напр.:
+//   imports: { dirs: ['repositories'] }   // шлях відносно srcDir (app/)
+// Конвенція методів: `*Query()` → кешовані (queryOptions, TanStack);
+// прості дієслова (getAll/create) → сирі/разові виклики та мутації.
 import { queryOptions } from '@tanstack/vue-query'
-export const itemsQuery = () => queryOptions({
-  queryKey: ['items'],
-  queryFn: () => useApi('/items'),
-  refetchInterval: API_CONFIG.pollingInterval,
-})
+export function useItemsRepository() {
+  const getAll = () => useApi('/items')
+  return {
+    getAll,                                    // разовий read (useApi), без кешу
+    listQuery: () => queryOptions({            // кешований read для use*Query (SSR або клієнт)
+      queryKey: ['items'],
+      queryFn: getAll,
+      refetchInterval: API_CONFIG.pollingInterval,
+    }),
+    create: (body) => useApi('/items', { method: 'POST', body }), // мутація (useApiMutation)
+  }
+}
 ```
 
 **Матриця вибору:**
@@ -321,7 +338,7 @@ experimental: {
 3. Підкоригувати `API_CONFIG` під проект (staleTime, polling, timeout).
 4. Прописати `routeRules` під реальні публічні/приватні маршрути.
 5. Підключити потрібні модулі (sitemap/robots/i18n) — зайві прибрати.
-6. Додати доменні `queries/*` та мутації через `useApiMutation`.
+6. Додати доменні репозиторії `app/repositories/use<Domain>Repository.ts` (read через `queryOptions` + мутації) і зареєструвати теку в `imports.dirs`.
 
 ---
 
