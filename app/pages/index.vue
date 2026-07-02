@@ -10,6 +10,7 @@ const examples = [
   { to: '/news-spa', title: 'Client cache', composable: 'useClientQuery', note: 'ssr: false · запит у браузері' },
   { to: '/news-oneoff', title: 'One-off request', composable: 'useApi', note: 'без кешу, на вимогу' },
   { to: '/bookmarks', title: 'Mutation + invalidate', composable: 'useApiMutation', note: 'POST + автооновлення списку' },
+  { to: '/errors', title: 'Обробка помилок', composable: 'useApiError + notifier', note: 'помилки по типах запитів' },
 ]
 
 const forms = [

@@ -8,5 +8,15 @@ export default defineEventHandler(async (event): Promise<Article[]> => {
     throw createError({ statusCode: 500, statusMessage: 'NEWS_API_KEY is not configured' })
   }
 
-  return newsRepository.fetchLatest(newsApiKey)
+  try {
+    return await newsRepository.fetchLatest(newsApiKey)
+  }
+  catch (err) {
+    // Зовнішній newsdata.io впав (500/таймаут тощо) — не пропускаємо «голий» апстрім-стек
+    // у клієнт. Логуємо деталі на сервері й віддаємо чистий 502, який клієнтський
+    // normalizeApiError покаже осмисленим message (error-UI сторінок новин).
+    console.error('[news] upstream newsdata.io failed:', (err as Error)?.message)
+    const message = 'Сервіс новин тимчасово недоступний. Спробуйте пізніше.'
+    throw createError({ statusCode: 502, message, data: { message } })
+  }
 })
