@@ -7,7 +7,7 @@ definePageMeta({
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
     { title: 'Головна', to: '/' },
-    { title: 'Posts', to: '/posts' },
+    { title: 'Posts', to: '/example-posts' },
     { title: 'Create' },
   ],
 })
@@ -21,7 +21,7 @@ const titles = {
 const { form, send, errors, pending, validateField } = useForm(
   addPost,
   { url: '', title: '11111', content: '' },
-  (post) => navigateTo({ name: 'posts-id', params: { id: post.id } }),
+  (post) => navigateTo({ name: 'example-posts-id', params: { id: post.id } }),
   {
     url: [rules.required, rules.maxLength(255)],
     title: [rules.required],

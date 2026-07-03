@@ -17,7 +17,7 @@ const { data: articles, isPending, error } = useClientQuery(news.listQuery())
 usePageCode([
   {
     title: 'useClientQuery',
-    code: `// routeRules: { '/news-spa': { ssr: false } }
+    code: `// routeRules: { '/example-news-spa': { ssr: false } }
 const news = useNewsRepository()
 
 // useQuery без onServerPrefetch (+ enabled на клієнті):

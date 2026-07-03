@@ -22,7 +22,7 @@ export function createHttp(): $Fetch {
 
     onResponseError({ response }) {
       if (response.status === 401 && import.meta.client) {
-        navigateTo('/login')
+        navigateTo('/example-login')
       }
     },
   })

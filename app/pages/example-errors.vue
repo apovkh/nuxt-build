@@ -313,7 +313,7 @@ const { form, errors, send, validateField } = useForm(
       <section class="rounded border border-border bg-muted/40 p-4 text-sm">
         <h2 class="font-medium">Особливі статуси</h2>
         <ul class="mt-2 list-disc space-y-1 pl-5 text-secondary">
-          <li><b>401</b> → <code>createHttp.onResponseError</code> робить авторедірект на <NuxtLink to="/login" class="text-primary">/login</NuxtLink> (тому його немає серед кнопок).</li>
+          <li><b>401</b> → <code>createHttp.onResponseError</code> робить авторедірект на <NuxtLink to="/example-login" class="text-primary">/example-login</NuxtLink> (тому його немає серед кнопок).</li>
           <li><b>422</b> у формах → <code>useForm</code> розкладає у помилки полів; решта помилок форми йдуть у глобальний хендлер.</li>
           <li>Тихий режим для конкретного запиту — <code>meta: { silent: true }</code> у його опціях.</li>
         </ul>

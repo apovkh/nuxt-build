@@ -38,7 +38,7 @@ export default defineNuxtConfig(
 
       routeRules: {
         // Приклад SPA-маршруту: рендериться лише на клієнті (демо useClientQuery).
-        '/news-spa': { ssr: false },
+        '/example-news-spa': { ssr: false },
       },
     },
     coreNuxtConfig,

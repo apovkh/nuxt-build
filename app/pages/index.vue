@@ -6,17 +6,17 @@ import type { Article } from '#shared/types/news'
 const { data: articles } = await useFetch<Article[]>('/api/news')
 
 const examples = [
-  { to: '/news-ssr', title: 'SSR + cache', composable: 'useServerQuery', note: 'ssr: true · дані в HTML (SEO)' },
-  { to: '/news-spa', title: 'Client cache', composable: 'useClientQuery', note: 'ssr: false · запит у браузері' },
-  { to: '/news-oneoff', title: 'One-off request', composable: 'useApi', note: 'без кешу, на вимогу' },
-  { to: '/bookmarks', title: 'Mutation + invalidate', composable: 'useApiMutation', note: 'POST + автооновлення списку' },
-  { to: '/errors', title: 'Обробка помилок', composable: 'useApiError + notifier', note: 'помилки по типах запитів' },
+  { to: '/example-news-ssr', title: 'SSR + cache', composable: 'useServerQuery', note: 'ssr: true · дані в HTML (SEO)' },
+  { to: '/example-news-spa', title: 'Client cache', composable: 'useClientQuery', note: 'ssr: false · запит у браузері' },
+  { to: '/example-news-oneoff', title: 'One-off request', composable: 'useApi', note: 'без кешу, на вимогу' },
+  { to: '/example-bookmarks', title: 'Mutation + invalidate', composable: 'useApiMutation', note: 'POST + автооновлення списку' },
+  { to: '/example-errors', title: 'Обробка помилок', composable: 'useApiError + notifier', note: 'помилки по типах запитів' },
 ]
 
 const forms = [
-  { to: '/form', title: 'Жива валідація', composable: 'useForm', note: 'клієнт + сервер (422)' },
-  { to: '/posts/create', title: 'Create post', composable: 'useForm + repo', note: 'addPost · валідація полів' },
-  { to: '/login', title: 'Login', composable: 'useForm + repo', note: 'login · токен у onSuccess' },
+  { to: '/example-form', title: 'Жива валідація', composable: 'useForm', note: 'клієнт + сервер (422)' },
+  { to: '/example-posts/create', title: 'Create post', composable: 'useForm + repo', note: 'addPost · валідація полів' },
+  { to: '/example-login', title: 'Login', composable: 'useForm + repo', note: 'login · токен у onSuccess' },
 ]
 </script>
 
