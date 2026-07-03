@@ -28,6 +28,11 @@ export default defineNuxtConfig(
       // defu просто додає це; коли шрифт відсутній — масив порожній, нічого не рендериться.
       app: { head: { link: [...fontPreload] } },
 
+      // Інлайнити CSS у HTML (замість окремого <link>). Проектний CSS крихітний
+      // (~3 KB gzip), тож економимо render-blocking round-trip на першому показі, а
+      // втрата крос-сторінкового кешу мізерна. У dev Nuxt однаково інлайн вимикає.
+      features: { inlineStyles: true },
+
       modules: ['@nuxt/image', '@nuxtjs/tailwindcss'],
 
       // Проектна папка компонентів. Ядро задає свою ~/core/components і цим заміщує дефолт,
@@ -35,18 +40,21 @@ export default defineNuxtConfig(
       components: ['~/components'],
 
       // Проектні data-access репозиторії. Шлях відносно srcDir (app/) → app/repositories.
+      // '**' підхоплює вкладену repositories/example (демо-репозиторії). composables/example —
+      // showcase-composable usePageCode (дефолтний auto-import сканує лише верхній рівень).
       // defu конкатенує з ядровими imports.dirs, тож use*Repository auto-import'яться.
-      imports: { dirs: ['repositories'] },
+      imports: { dirs: ['repositories', 'repositories/**', 'composables/example'] },
 
       // Серверний data-access шар. Nitro автоімпортує лише server/utils за замовчуванням,
       // тож server/repositories реєструємо явно → newsRepository/bookmarksRepository у роутах.
-      nitro: { imports: { dirs: ['server/repositories'] } },
+      // '**' підхоплює вкладену server/repositories/example (демо).
+      nitro: { imports: { dirs: ['server/repositories', 'server/repositories/**'] } },
 
       runtimeConfig: {
         // Приватний ключ, лише на сервері. Overridable через NUXT_NEWS_API_KEY.
         newsApiKey: process.env.NEWS_API_KEY,
         public: {
-          // baseURL для $api (core/plugins/api.ts). '/api' → useApi('/news') б'є у /api/news.
+          // baseURL для $api (core/plugins/api.ts). '/api' → useApi('/example/news') б'є у /api/example/news.
           apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
         },
       },
