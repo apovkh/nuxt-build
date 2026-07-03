@@ -1,12 +1,9 @@
-# Fonts
+# Fonts — moved to /public/fonts
 
-Drop self-hosted fonts here in `.woff2` format.
+Self-hosted fonts now live in **`/public/fonts/`**, not here.
 
-By default `../fonts.css` expects the file:
+Why: a public, unhashed path (e.g. `/fonts/Montserrat-Variable.woff2`) gives a stable
+URL that `nuxt.config.ts` can `<link rel="preload">` for faster first paint. A
+bundled/hashed path can't be preloaded by a static href.
 
-```
-Inter-Variable.woff2
-```
-
-If you change the font — replace the file, update `@font-face` in `../fonts.css`
-and `typography.fontFamily` in `../typography.ts`.
+See `public/fonts/README.md`. This folder is kept only as a signpost.

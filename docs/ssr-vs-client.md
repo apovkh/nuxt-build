@@ -114,7 +114,87 @@ SSR-запит:
 
 ---
 
-## 4. Що працює лише на клієнті (і як це позначити)
+## 4. Стилі (CSS) і шрифти при SSR — коли миготить і як прибрати
+
+Часте питання: «чи треба щось робити, щоб стилі прийшли одразу при SSR?».
+Коротко — **у проді ні: стилі вже в `<head>` до першого показу**. Спалах
+нестилізованого контенту (FOUC), який інколи видно, — це майже завжди `nuxt dev`.
+
+### 4.1 Чому в `dev` миготить, а в проді ні
+Nuxt резолвить `features.inlineStyles` так (спрощено, `@nuxt/schema` 4.x):
+- **`nuxt dev`** → `inlineStyles` примусово `false`. Vite віддає CSS через JS і вставляє
+  `<style>` **після** гідрації → звідси FOUC. Тільки в деві.
+- **`nuxt build` (ssr:true)** → дефолт `id => id.includes('.vue')`: стилі компонентів
+  **інлайняться в HTML**.
+
+### 4.2 Що летить у HTML у проді
+
+| Джерело | Доставка при SSR | Коли готове |
+|---|---|---|
+| Стилі `.vue`-компонентів (`<style scoped>`) | **інлайн** `<style>` у `<head>` | до першого показу, без запиту |
+| Глобальний CSS — `~/core/tokens/main.css` + Tailwind | `<link rel="stylesheet">` у `<head>` | до першого показу (render-blocking) |
+
+`<link rel="stylesheet">` у `<head>` — render-blocking: браузер не малює, доки CSS не
+завантажився. Тому і Tailwind «встигає». **За замовчуванням FOUC у проді немає — робити
+нічого не треба.**
+
+> У цьому проекті стилі — Tailwind-утиліти, тож `.vue` майже не мають власних `<style>`
+> блоків: практично **весь CSS іде одним глобальним `<link>`** (`/_nuxt/entry.*.css`),
+> а інлайн `<style>` побачиш лише там, де компонент оголосив свій `<style scoped>`.
+> (Перевірено на прод-білді: у `<head>` є `<link rel="stylesheet">` і `<link rel="preload" as="font">`, окремих `<style>` нема — і це нормально.)
+
+### 4.3 Важіль: інлайнити і глобальний CSS
+Якщо хочеш вкласти в HTML увесь CSS (не лише `.vue`):
+```ts
+// nuxt.config.ts
+features: { inlineStyles: true }
+```
+**Trade-off:** глобальний Tailwind тоді потрапляє в **кожну** відповідь → більший HTML і
+гірше кешування (один спільний `<link>` кешується між сторінками, інлайн — ні). Дефолт
+(link для глобального, inline для компонентного) зазвичай кращий.
+
+### 4.4 Шрифти — окрема вісь (FOUT, не CSS)
+Навіть коли CSS на місці, self-hosted шрифт із `font-display: swap` дає **FOUT**: спершу
+системний шрифт, потім перестрибування на свій — бо `.woff2` тягнеться асинхронно. CSS
+тут ні до чого.
+
+Як зроблено в проекті (шрифт — **Montserrat**, variable):
+1. **woff2, не ttf.** Сирий Google-`.ttf` (~688 KB) сконвертовано в `.woff2` (~214 KB) —
+   variable-вісь `wght 100–900` лишається в одному файлі:
+   `npx --yes ttf2woff2 < in.ttf > out.woff2`.
+2. **Публічний, нехешований шлях.** Файли в `public/fonts/`
+   (`/fonts/Montserrat-Variable.woff2`), не в бандлі — бо preload потребує стабільного
+   URL, а бандл дає хеш.
+3. **`@font-face`** у `app/core/tokens/fonts.css` вказує на цей `/fonts/…`;
+   `typography.ts` виставляє `fontFamily` на `Montserrat`.
+4. **Guarded preload** у `nuxt.config.ts`:
+   ```ts
+   const CRITICAL_FONT = 'Montserrat-Variable.woff2'
+   const fontPreload = existsSync(fileURLToPath(new URL(`./public/fonts/${CRITICAL_FONT}`, import.meta.url)))
+     ? [{ rel: 'preload', as: 'font', type: 'font/woff2', href: `/fonts/${CRITICAL_FONT}`, crossorigin: 'anonymous' }]
+     : []
+   // ...
+   app: { head: { link: [...fontPreload] } },
+   ```
+   `existsSync` — щоб `<link>` додавався, ЛИШЕ коли файл реально є (інакше 404 +
+   «preloaded but not used»). `crossorigin` для шрифтів обов'язковий, інакше браузер
+   тягне файл двічі.
+
+> Альтернатива без ручного шляху — модуль `@nuxt/fonts` (сам знаходить `@font-face`,
+> self-host'ить, додає preload). Зараз не підключений.
+
+### 4.5 Як перевірити (не по `dev`!)
+```bash
+npm run build && npm run preview
+```
+`view-source` сторінки → у `<head>` є `<link rel="stylesheet">` (Tailwind — майже весь
+CSS проекту) і `<link rel="preload" as="font">` (шрифт). Інлайн `<style>` зʼявиться лише
+для компонентів із власним `<style>` блоком (у Tailwind-first проекті їх зазвичай нема —
+це нормально).
+
+---
+
+## 5. Що працює лише на клієнті (і як це позначити)
 
 Код, який чіпає браузерні API, **впаде на сервері** (`window`, `document`,
 `localStorage`, `navigator` там не існують). Захищай так:
@@ -134,12 +214,12 @@ SSR-запит:
 
 ---
 
-## 5. Що працює лише на сервері (серверні компоненти та серверний код)
+## 6. Що працює лише на сервері (серверні компоненти та серверний код)
 
-Симетрично до §4: є речі, які мають жити **тільки на сервері** — секрети, ключі до
+Симетрично до §5: є речі, які мають жити **тільки на сервері** — секрети, ключі до
 API, доступ до БД, важкі залежності, яких не хочеш у клієнтському бандлі.
 
-### 5.1 Серверні компоненти (Nuxt Server Components / islands)
+### 6.1 Серверні компоненти (Nuxt Server Components / islands)
 - **Що:** компонент, що рендериться **лише на сервері** й віддає готовий HTML **без
   JS** у клієнтський бандл. Протилежність `<ClientOnly>`.
 - **Коли:** важкий/статичний контент (рендер Markdown, підсвітка коду, великі
@@ -155,7 +235,7 @@ API, доступ до БД, важкі залежності, яких не хо
 | `<ClientOnly>` | лише клієнт | так | браузерні API |
 | Серверний (`*.server.vue`) | лише сервер | ні | статика, важкі залежності, без інтерактиву |
 
-### 5.2 Серверний код — директорія `server/` (Nitro)
+### 6.2 Серверний код — директорія `server/` (Nitro)
 Тут живе **бекенд** застосунку. У цьому проекті — `server/api` + `server/repositories`.
 
 | Папка | Що | У проекті |
@@ -167,7 +247,7 @@ API, доступ до БД, важкі залежності, яких не хо
 | `server/plugins/*` | хуки життєвого циклу Nitro | — |
 | `server/utils/*` | автоімпортовані серверні хелпери | — |
 
-### 5.3 Серверні утиліти, які знадобляться
+### 6.3 Серверні утиліти, які знадобляться
 - **`useRuntimeConfig(event)`** — читати приватний конфіг/секрети (лише сервер);
   напр. `server/api/news.get.ts` бере `newsApiKey`.
 - **`createError({ statusCode, statusMessage })`** — кинути HTTP-помилку з роуту.
@@ -183,7 +263,7 @@ API, доступ до БД, важкі залежності, яких не хо
 
 ---
 
-## 6. Типові граблі SSR
+## 7. Типові граблі SSR
 
 1. **Hydration mismatch** — HTML із сервера має збігатися з першим рендером на
    клієнті. Ламають: `Date.now()`, `Math.random()`, гілки по `window` під час рендеру,
@@ -199,7 +279,7 @@ API, доступ до БД, важкі залежності, яких не хо
 
 ---
 
-## 7. Куди дивитись у коді
+## 8. Куди дивитись у коді
 
 | Хочу побачити… | Файл |
 |---|---|
@@ -209,6 +289,7 @@ API, доступ до БД, важкі залежності, яких не хо
 | Разовий запит | `app/pages/news-oneoff.vue` + `app/core/composables/useApi.ts` |
 | Мутація + інвалідація | `app/pages/bookmarks.vue` + `app/core/composables/useApiMutation.ts` |
 | Гідрація TanStack (dehydrate/hydrate) | `app/core/plugins/vue-query.ts` |
+| Стилі/шрифти при SSR + preload | §4 + `nuxt.config.ts` (`fontPreload`) + `public/fonts/` |
 | Серверний ендпоінт + секрети | `server/api/news.get.ts` + `server/repositories/newsRepository.ts` |
 | Серверні компоненти (islands) | `experimental.componentIslands` у `nuxt.config` (опційно) |
 | Вимкнути SSR на маршруті | `nuxt.config.ts` → `routeRules` |
@@ -221,4 +302,5 @@ API, доступ до БД, важкі залежності, яких не хо
 - Просто дані в HTML → **`useFetch`**. Треба ще кеш/інвалідація → **`useServerQuery`**.
 - Клієнтська сторінка (ssr:false) → **`useClientQuery`**. Разово → **`useApi`**. Зміни → **`useApiMutation`**.
 - `<Suspense>` дає Nuxt — просто став `await` у setup. Браузерне — у `<ClientOnly>` / `onMounted` / `import.meta.client`.
+- Стилі при SSR — вже в `<head>` у проді (FOUC буває лише в `dev`). Шрифти → `preload` woff2 зі стабільного `public/fonts/` проти FOUT.
 - Секрети/ключі/БД/важкі залежності → **сервер**: `server/api` + `server/repositories`, за потреби серверні компоненти (`*.server.vue`).

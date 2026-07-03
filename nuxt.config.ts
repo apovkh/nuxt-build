@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { defu } from 'defu'
 import { coreNuxtConfig } from './app/core/nuxt.core.config'
 
@@ -6,12 +8,25 @@ import { coreNuxtConfig } from './app/core/nuxt.core.config'
 // defu глибоко об'єднує обʼєкти й КОНКАТЕНУЄ масиви (css/plugins/imports/components),
 // тож ядрові плагіни ($api, vue-query), auto-import composables та tokens/tailwind
 // підключаються разом із проектними значеннями. База — другим аргументом.
+// Preload найкритичнішого шрифту (upright Montserrat) → менше FOUT: браузер тягне
+// .woff2 одразу з <head>, паралельно з CSS. Guarded: <link> додається, ЛИШЕ коли файл
+// реально існує в /public/fonts — інакше був би 404 + "preloaded but not used".
+// Публічний (нехешований) шлях і робить статичний preload можливим — з бандла ні.
+const CRITICAL_FONT = 'Montserrat-Variable.woff2'
+const fontPreload = existsSync(fileURLToPath(new URL(`./public/fonts/${CRITICAL_FONT}`, import.meta.url)))
+  ? [{ rel: 'preload', as: 'font', type: 'font/woff2', href: `/fonts/${CRITICAL_FONT}`, crossorigin: 'anonymous' }]
+  : []
+
 export default defineNuxtConfig(
   defu(
     {
       compatibilityDate: '2025-07-15',
       devtools: { enabled: true },
       ssr: true,
+
+      // Preload критичного шрифту з <head> (fontPreload вище). Ядро не задає app, тож
+      // defu просто додає це; коли шрифт відсутній — масив порожній, нічого не рендериться.
+      app: { head: { link: [...fontPreload] } },
 
       modules: ['@nuxt/image', '@nuxtjs/tailwindcss'],
 
