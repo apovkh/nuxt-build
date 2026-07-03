@@ -1,4 +1,4 @@
-import type { Bookmark } from '#shared/types/bookmarks'
+import type { Bookmark } from '#shared/types/example/bookmarks'
 
 // POST /api/bookmarks — валідовує title і делегує серверному репозиторію.
 export default defineEventHandler(async (event): Promise<Bookmark> => {

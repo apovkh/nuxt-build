@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { listPosts } from '~/repositories/posts'
+import { listPosts } from '~/repositories/example/posts'
 
 definePageMeta({
   title: 'Posts — useClientQuery',
@@ -19,7 +19,7 @@ const { data: posts, isPending } = useClientQuery({
 usePageCode([
   {
     title: 'useClientQuery + repo',
-    code: `import { listPosts } from '~/repositories/posts'
+    code: `import { listPosts } from '~/repositories/example/posts'
 
 // той самий репозиторій, що й у формі — як queryFn
 const { data: posts, isPending } = useClientQuery({

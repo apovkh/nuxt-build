@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Article } from '#shared/types/news'
+import type { Article } from '#shared/types/example/news'
 
 definePageMeta({
   title: 'One-off request — useApi',

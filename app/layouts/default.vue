@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import type { CodeTab } from '~/composables/usePageCode'
+import type { CodeTab } from '~/composables/example/usePageCode'
 
 const route = useRoute()
 
@@ -37,7 +37,7 @@ const hasShell = computed(() => Boolean(title.value || maxWidth.value || hasCode
         <slot />
       </div>
       <div class="space-y-4">
-        <CodeCopy v-for="tab in code" :key="tab.title" :title="tab.title" :code="tab.code" />
+        <ExampleCodeCopy v-for="tab in code" :key="tab.title" :title="tab.title" :code="tab.code" />
       </div>
     </div>
 

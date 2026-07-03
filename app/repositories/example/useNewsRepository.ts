@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/vue-query'
-import type { Article } from '#shared/types/news'
+import type { Article } from '#shared/types/example/news'
 
 /**
  * Репозиторій ресурсу "news" — єдина точка доступу до даних новин.
@@ -7,7 +7,7 @@ import type { Article } from '#shared/types/news'
  * (`getAll`) → сирі/разові виклики. SSR vs клієнт вирішує сторінка композаблом.
  */
 export function useNewsRepository() {
-  const getAll = () => useApi<Article[]>('/news')
+  const getAll = () => useApi<Article[]>('/example/news')
 
   return {
     /** Статичний / разовий read без кешу → useApi або прямий await. */

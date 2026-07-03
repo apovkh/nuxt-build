@@ -16,7 +16,7 @@ export function useDemoErrorRepository() {
   // Сирий виклик транспорту (без само-нотифікації) — для кешованих запитів, мутацій
   // і useForm, де глобально нотифікує вже TanStack cache / сам useForm мапить 422.
   const request = (status: number) =>
-    http<DemoErrorResult>('/demo-error', { query: { status } })
+    http<DemoErrorResult>('/example/demo-error', { query: { status } })
 
   return {
     request,
@@ -25,7 +25,7 @@ export function useDemoErrorRepository() {
      * і ре-throw'ить, щоб компонент зловив її локально (useApiError).
      */
     requestOnce: (status: number) =>
-      useApi<DemoErrorResult>('/demo-error', { query: { status } }),
+      useApi<DemoErrorResult>('/example/demo-error', { query: { status } }),
     /**
      * Кешований запит для useClientQuery. retry: false — щоб помилка показалась одразу,
      * без ретраїв TanStack.

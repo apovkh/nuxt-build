@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Article } from '#shared/types/news'
+import type { Article } from '#shared/types/example/news'
 
 // Нативний Nuxt-варіант (для контрасту з core-composables нижче):
 // useFetch — SSR + перенос payload на клієнт, АЛЕ без TanStack-кешу/інвалідації.
-const { data: articles } = await useFetch<Article[]>('/api/news')
+const { data: articles } = await useFetch<Article[]>('/api/example/news')
 
 const examples = [
   { to: '/example-news-ssr', title: 'SSR + cache', composable: 'useServerQuery', note: 'ssr: true · дані в HTML (SEO)' },

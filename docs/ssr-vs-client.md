@@ -131,27 +131,28 @@ Nuxt резолвить `features.inlineStyles` так (спрощено, `@nuxt
 
 | Джерело | Доставка при SSR | Коли готове |
 |---|---|---|
-| Стилі `.vue`-компонентів (`<style scoped>`) | **інлайн** `<style>` у `<head>` | до першого показу, без запиту |
-| Глобальний CSS — `~/core/tokens/main.css` + Tailwind | `<link rel="stylesheet">` у `<head>` | до першого показу (render-blocking) |
+| Глобальний CSS — `~/core/tokens/main.css` + Tailwind | **інлайн** `<style>` у `<head>` | разом з HTML, 0 окремих запитів |
+| Стилі `.vue`-компонентів (`<style scoped>`) | **інлайн** `<style>` у `<head>` | разом з HTML |
 
-`<link rel="stylesheet">` у `<head>` — render-blocking: браузер не малює, доки CSS не
-завантажився. Тому і Tailwind «встигає». **За замовчуванням FOUC у проді немає — робити
-нічого не треба.**
+Тут `features.inlineStyles: true` (§4.3) — тож окремого `<link rel="stylesheet">` немає,
+стилі приходять у самому документі. Браузер малює одразу після парсингу HTML, без
+render-blocking round-trip на CSS. **FOUC у проді немає.**
 
-> У цьому проекті стилі — Tailwind-утиліти, тож `.vue` майже не мають власних `<style>`
-> блоків: практично **весь CSS іде одним глобальним `<link>`** (`/_nuxt/entry.*.css`),
-> а інлайн `<style>` побачиш лише там, де компонент оголосив свій `<style scoped>`.
-> (Перевірено на прод-білді: у `<head>` є `<link rel="stylesheet">` і `<link rel="preload" as="font">`, окремих `<style>` нема — і це нормально.)
+> Перевірено на прод-білді: у `<head>` один `<style>` (увесь CSS проекту, ~2.86 KB gzip)
+> і `<link rel="preload" as="font">`, а `<link rel="stylesheet">` **відсутній**.
 
-### 4.3 Важіль: інлайнити і глобальний CSS
-Якщо хочеш вкласти в HTML увесь CSS (не лише `.vue`):
+### 4.3 Як увімкнено: `inlineStyles: true`
+Проект інлайнить увесь CSS у HTML:
 ```ts
 // nuxt.config.ts
 features: { inlineStyles: true }
 ```
-**Trade-off:** глобальний Tailwind тоді потрапляє в **кожну** відповідь → більший HTML і
-гірше кешування (один спільний `<link>` кешується між сторінками, інлайн — ні). Дефолт
-(link для глобального, inline для компонентного) зазвичай кращий.
+**Чому це тут виправдано:** зібраний CSS крихітний — **~11.6 KB (2.86 KB gzip)**. Інлайн
+економить render-blocking round-trip на першому показі (браузер не тягне окремий `.css`),
+а «мінус» — CSS не кешується окремо між сторінками — при 3 KB мізерний.
+
+**Коли вимкнути (`inlineStyles: false`):** якщо CSS розросте до десятків/сотень KB — тоді
+один спільний кешований `<link>` вигідніший за інлайн у кожну відповідь.
 
 ### 4.4 Шрифти — окрема вісь (FOUT, не CSS)
 Навіть коли CSS на місці, self-hosted шрифт із `font-display: swap` дає **FOUT**: спершу
@@ -187,10 +188,9 @@ features: { inlineStyles: true }
 ```bash
 npm run build && npm run preview
 ```
-`view-source` сторінки → у `<head>` є `<link rel="stylesheet">` (Tailwind — майже весь
-CSS проекту) і `<link rel="preload" as="font">` (шрифт). Інлайн `<style>` зʼявиться лише
-для компонентів із власним `<style>` блоком (у Tailwind-first проекті їх зазвичай нема —
-це нормально).
+`view-source` сторінки → у `<head>` є інлайн `<style>` (увесь CSS — бо `inlineStyles:
+true`) і `<link rel="preload" as="font">` (шрифт), а окремого `<link rel="stylesheet">`
+нема. У `dev` натомість інлайн вимкнено (CSS через JS) — тому й перевіряй на `build`.
 
 ---
 
@@ -289,7 +289,7 @@ API, доступ до БД, важкі залежності, яких не хо
 | Разовий запит | `app/pages/news-oneoff.vue` + `app/core/composables/useApi.ts` |
 | Мутація + інвалідація | `app/pages/bookmarks.vue` + `app/core/composables/useApiMutation.ts` |
 | Гідрація TanStack (dehydrate/hydrate) | `app/core/plugins/vue-query.ts` |
-| Стилі/шрифти при SSR + preload | §4 + `nuxt.config.ts` (`fontPreload`) + `public/fonts/` |
+| Стилі/шрифти при SSR (inline + preload) | §4 + `nuxt.config.ts` (`inlineStyles`, `fontPreload`) + `public/fonts/` |
 | Серверний ендпоінт + секрети | `server/api/news.get.ts` + `server/repositories/newsRepository.ts` |
 | Серверні компоненти (islands) | `experimental.componentIslands` у `nuxt.config` (опційно) |
 | Вимкнути SSR на маршруті | `nuxt.config.ts` → `routeRules` |
@@ -302,5 +302,5 @@ API, доступ до БД, важкі залежності, яких не хо
 - Просто дані в HTML → **`useFetch`**. Треба ще кеш/інвалідація → **`useServerQuery`**.
 - Клієнтська сторінка (ssr:false) → **`useClientQuery`**. Разово → **`useApi`**. Зміни → **`useApiMutation`**.
 - `<Suspense>` дає Nuxt — просто став `await` у setup. Браузерне — у `<ClientOnly>` / `onMounted` / `import.meta.client`.
-- Стилі при SSR — вже в `<head>` у проді (FOUC буває лише в `dev`). Шрифти → `preload` woff2 зі стабільного `public/fonts/` проти FOUT.
+- Стилі при SSR — інлайняться в HTML (`features.inlineStyles: true`), тож приходять з документом (FOUC буває лише в `dev`). Шрифти → `preload` woff2 зі стабільного `public/fonts/` проти FOUT.
 - Секрети/ключі/БД/важкі залежності → **сервер**: `server/api` + `server/repositories`, за потреби серверні компоненти (`*.server.vue`).

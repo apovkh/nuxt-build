@@ -1,4 +1,4 @@
-import type { Article } from '#shared/types/news'
+import type { Article } from '#shared/types/example/news'
 
 // Тонкий роут: читає приватний ключ і делегує серверному репозиторію (server/repositories).
 export default defineEventHandler(async (event): Promise<Article[]> => {

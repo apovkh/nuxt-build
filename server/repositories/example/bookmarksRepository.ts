@@ -1,4 +1,4 @@
-import type { Bookmark } from '#shared/types/bookmarks'
+import type { Bookmark } from '#shared/types/example/bookmarks'
 
 // Серверний data-access ресурсу "bookmarks" — in-memory demo store.
 // Стан на рівні модуля → спільний між запитами, скидається при рестарті сервера. Лише для демо.

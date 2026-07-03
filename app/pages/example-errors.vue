@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { rules } from '~/core/utils/validation'
 import { setApiErrorNotifier } from '~/core/utils/handleApiError'
-import type { DemoErrorResult } from '~/repositories/useDemoErrorRepository'
+import type { DemoErrorResult } from '~/repositories/example/useDemoErrorRepository'
 
 definePageMeta({
   title: 'Обробка помилок — різні типи запитів',

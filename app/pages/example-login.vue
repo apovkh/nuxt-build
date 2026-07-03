@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { login } from '~/repositories/auth'
+import { login } from '~/repositories/example/auth'
 import { rules } from '~/core/utils/validation'
 
 definePageMeta({

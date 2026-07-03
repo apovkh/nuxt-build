@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { addPost } from '~/repositories/posts'
+import { addPost } from '~/repositories/example/posts'
 import { rules } from '~/core/utils/validation'
 
 definePageMeta({
