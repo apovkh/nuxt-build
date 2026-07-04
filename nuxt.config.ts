@@ -33,7 +33,11 @@ export default defineNuxtConfig(
       // втрата крос-сторінкового кешу мізерна. У dev Nuxt однаково інлайн вимикає.
       features: { inlineStyles: true },
 
-      modules: ['@nuxt/image', '@nuxtjs/tailwindcss'],
+      modules: ['@nuxt/image', '@nuxtjs/tailwindcss', '@nuxt/eslint'],
+
+      // ESLint: antfu-пресет несе власні інстанси плагінів — standalone: false
+      // прибирає дублікати з nuxt-конфіга (інакше конфлікт plugin "import").
+      eslint: { config: { standalone: false } },
 
       // Проектна папка компонентів. Ядро задає свою ~/core/components і цим заміщує дефолт,
       // тож ~/components повертаємо тут; defu сконкатенує обидві.
