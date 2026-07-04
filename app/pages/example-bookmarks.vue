@@ -27,7 +27,9 @@ const { mutate: add, isPending: isAdding } = useApiMutation({
 
 function submit() {
   const value = title.value.trim()
-  if (value) add({ title: value })
+
+  if (value)
+    add({ title: value })
 }
 
 usePageCode([
@@ -64,12 +66,16 @@ const { mutate: add, isPending } = useApiMutation({
       </button>
     </form>
 
-    <p v-if="isPending" class="mt-6">Loading…</p>
+    <p v-if="isPending" class="mt-6">
+      Loading…
+    </p>
     <ul v-else class="mt-6 space-y-2">
       <li v-for="bookmark in bookmarks" :key="bookmark.id" class="rounded border border-border p-3">
         {{ bookmark.title }}
       </li>
-      <li v-if="!bookmarks?.length">No bookmarks yet.</li>
+      <li v-if="!bookmarks?.length">
+        No bookmarks yet.
+      </li>
     </ul>
   </div>
 </template>

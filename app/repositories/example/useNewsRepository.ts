@@ -1,5 +1,5 @@
-import { queryOptions } from '@tanstack/vue-query'
 import type { Article } from '#shared/types/example/news'
+import { queryOptions } from '@tanstack/vue-query'
 
 /**
  * Репозиторій ресурсу "news" — єдина точка доступу до даних новин.

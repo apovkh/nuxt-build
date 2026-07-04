@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { addPost } from '~/repositories/example/posts'
 import { rules } from '~/core/utils/validation'
+import { addPost } from '~/repositories/example/posts'
 
 definePageMeta({
   hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
@@ -14,15 +14,15 @@ definePageMeta({
 })
 
 const titles = {
-  '11111': 'Some',
-  '22222': 'Other',
-  '33333': 'Tired to select',
+  11111: 'Some',
+  22222: 'Other',
+  33333: 'Tired to select',
 }
 
 const { form, send, errors, pending, validateField } = useForm(
   addPost,
   { url: '', title: '11111', content: '' },
-  (post) => navigateTo({ name: 'example-posts-id', params: { id: post.id } }),
+  post => navigateTo({ name: 'example-posts-id', params: { id: post.id } }),
   {
     url: [rules.required, rules.maxLength(255)],
     title: [rules.required],
@@ -62,23 +62,33 @@ usePageCode([
     <div>
       <label class="block mb-1">Url</label>
       <input v-model="form.url" type="text" class="border rounded px-3 py-2 w-full" @blur="validateField('url')">
-      <p v-if="errors.url?.[0]" class="text-error text-sm">{{ errors.url[0] }}</p>
+      <p v-if="errors.url?.[0]" class="text-error text-sm">
+        {{ errors.url[0] }}
+      </p>
     </div>
 
     <div>
       <label class="block mb-1">Title</label>
       <select v-model="form.title" class="border rounded px-3 py-2 w-full">
-        <option v-for="(label, key) in titles" :key="key" :value="key">{{ label }}</option>
+        <option v-for="(label, key) in titles" :key="key" :value="key">
+          {{ label }}
+        </option>
       </select>
-      <p v-if="errors.title?.[0]" class="text-error text-sm">{{ errors.title[0] }}</p>
+      <p v-if="errors.title?.[0]" class="text-error text-sm">
+        {{ errors.title[0] }}
+      </p>
     </div>
 
     <div>
       <label class="block mb-1">Content</label>
       <input v-model="form.content" type="text" class="border rounded px-3 py-2 w-full" @blur="validateField('content')">
-      <p v-if="errors.content?.[0]" class="text-error text-sm">{{ errors.content[0] }}</p>
+      <p v-if="errors.content?.[0]" class="text-error text-sm">
+        {{ errors.content[0] }}
+      </p>
     </div>
 
-    <button type="submit" :disabled="pending" class="bg-primary text-white rounded px-4 py-2 disabled:opacity-50">Send</button>
+    <button type="submit" :disabled="pending" class="bg-primary text-white rounded px-4 py-2 disabled:opacity-50">
+      Send
+    </button>
   </form>
 </template>

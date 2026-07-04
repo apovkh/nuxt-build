@@ -1,5 +1,5 @@
-import { queryOptions } from '@tanstack/vue-query'
 import type { Bookmark } from '#shared/types/example/bookmarks'
+import { queryOptions } from '@tanstack/vue-query'
 
 /**
  * Репозиторій ресурсу "bookmarks" — читання + мутації.

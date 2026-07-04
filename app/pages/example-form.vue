@@ -13,9 +13,9 @@ definePageMeta({
 })
 
 // Мок API без бекенду — просто імітує успішний запит через 600мс.
-function fakeRegister(data: { name: string, email: string, password: string, agree: boolean }) {
+function fakeRegister(_data: { name: string, email: string, password: string, agree: boolean }) {
   return new Promise<{ id: number }>((resolve) => {
-    setTimeout(() => resolve({ id: 1 }), 600)
+    setTimeout(resolve, 600, { id: 1 })
   })
 }
 
@@ -98,19 +98,25 @@ usePageCode([
     <div>
       <label class="block mb-1">Імʼя</label>
       <input v-model="form.name" type="text" class="border rounded px-3 py-2 w-full" @blur="validateField('name')">
-      <p v-if="errors.name?.[0]" class="text-error text-sm mt-1">{{ errors.name[0] }}</p>
+      <p v-if="errors.name?.[0]" class="text-error text-sm mt-1">
+        {{ errors.name[0] }}
+      </p>
     </div>
 
     <div>
       <label class="block mb-1">Email</label>
       <input v-model="form.email" type="text" class="border rounded px-3 py-2 w-full" @blur="validateField('email')">
-      <p v-if="errors.email?.[0]" class="text-error text-sm mt-1">{{ errors.email[0] }}</p>
+      <p v-if="errors.email?.[0]" class="text-error text-sm mt-1">
+        {{ errors.email[0] }}
+      </p>
     </div>
 
     <div>
       <label class="block mb-1">Пароль</label>
       <input v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" @blur="validateField('password')">
-      <p v-if="errors.password?.[0]" class="text-error text-sm mt-1">{{ errors.password[0] }}</p>
+      <p v-if="errors.password?.[0]" class="text-error text-sm mt-1">
+        {{ errors.password[0] }}
+      </p>
     </div>
 
     <div>
@@ -118,16 +124,22 @@ usePageCode([
         <input v-model="form.agree" type="checkbox" @change="validateField('agree')">
         Погоджуюсь з умовами
       </label>
-      <p v-if="errors.agree?.[0]" class="text-error text-sm mt-1">{{ errors.agree[0] }}</p>
+      <p v-if="errors.agree?.[0]" class="text-error text-sm mt-1">
+        {{ errors.agree[0] }}
+      </p>
     </div>
 
     <div class="flex items-center gap-3">
       <button type="submit" :disabled="pending" class="bg-primary text-white rounded px-4 py-2 disabled:opacity-50">
         {{ pending ? 'Надсилаю…' : 'Зареєструватись' }}
       </button>
-      <button type="reset" class="bg-muted text-secondary rounded px-4 py-2">Скинути</button>
+      <button type="reset" class="bg-muted text-secondary rounded px-4 py-2">
+        Скинути
+      </button>
     </div>
 
-    <p v-if="success" class="text-success">Успішно надіслано ✓</p>
+    <p v-if="success" class="text-success">
+      Успішно надіслано ✓
+    </p>
   </form>
 </template>

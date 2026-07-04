@@ -22,7 +22,9 @@ const forms = [
 
 <template>
   <div class="mx-auto max-w-[1600px] px-6 pb-6 pt-4">
-    <h1 class="text-2xl font-bold">app/core — приклади data-fetching</h1>
+    <h1 class="text-2xl font-bold">
+      app/core — приклади data-fetching
+    </h1>
     <p class="mt-1 text-sm">
       Кожна сторінка демонструє свій composable ядра для сценарію SSR true / false.
     </p>
@@ -33,33 +35,49 @@ const forms = [
           :to="example.to"
           class="block rounded border border-border p-4 transition hover:border-primary"
         >
-          <div class="font-medium">{{ example.title }}</div>
+          <div class="font-medium">
+            {{ example.title }}
+          </div>
           <code class="text-sm text-primary">{{ example.composable }}</code>
-          <div class="mt-1 text-xs">{{ example.note }}</div>
+          <div class="mt-1 text-xs">
+            {{ example.note }}
+          </div>
         </NuxtLink>
       </li>
     </ul>
 
     <section class="mt-10">
-      <h2 class="text-lg font-semibold">Форми — <code>useForm</code></h2>
-      <p class="text-sm">Клієнтська валідація (rules) + серверна (422) в один <code>errors</code>.</p>
+      <h2 class="text-lg font-semibold">
+        Форми — <code>useForm</code>
+      </h2>
+      <p class="text-sm">
+        Клієнтська валідація (rules) + серверна (422) в один <code>errors</code>.
+      </p>
       <ul class="mt-3 grid gap-3 sm:grid-cols-2">
         <li v-for="form in forms" :key="form.to">
           <NuxtLink
             :to="form.to"
             class="block rounded border border-border p-4 transition hover:border-primary"
           >
-            <div class="font-medium">{{ form.title }}</div>
+            <div class="font-medium">
+              {{ form.title }}
+            </div>
             <code class="text-sm text-primary">{{ form.composable }}</code>
-            <div class="mt-1 text-xs">{{ form.note }}</div>
+            <div class="mt-1 text-xs">
+              {{ form.note }}
+            </div>
           </NuxtLink>
         </li>
       </ul>
     </section>
 
     <section class="mt-10">
-      <h2 class="text-lg font-semibold">Native <code>useFetch</code> (SSR, без TanStack-кешу)</h2>
-      <p class="text-sm">Вбудований варіант Nuxt — коли кеш/інвалідація не потрібні.</p>
+      <h2 class="text-lg font-semibold">
+        Native <code>useFetch</code> (SSR, без TanStack-кешу)
+      </h2>
+      <p class="text-sm">
+        Вбудований варіант Nuxt — коли кеш/інвалідація не потрібні.
+      </p>
       <ul class="mt-3 space-y-1">
         <li v-for="article in articles" :key="article.article_id" class="text-sm">
           {{ article.title }}

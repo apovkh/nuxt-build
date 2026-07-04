@@ -68,8 +68,12 @@ async function load() {
       {{ pending ? 'Fetching…' : 'Fetch news now' }}
     </button>
 
-    <p v-if="error" class="mt-4 text-error">{{ error }}</p>
-    <p v-else-if="loaded && !articles.length" class="mt-4">No articles.</p>
+    <p v-if="error" class="mt-4 text-error">
+      {{ error }}
+    </p>
+    <p v-else-if="loaded && !articles.length" class="mt-4">
+      No articles.
+    </p>
 
     <ul class="mt-6 space-y-2">
       <li v-for="article in articles" :key="article.article_id" class="rounded border border-border p-3">

@@ -13,6 +13,7 @@ export function createHttp(): $Fetch {
 
     onRequest({ options }) {
       const token = useCookie('token').value
+
       if (token) {
         const headers = new Headers(options.headers)
         headers.set('Authorization', `Bearer ${token}`)

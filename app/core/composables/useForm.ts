@@ -1,8 +1,8 @@
-import { reactive, ref } from 'vue'
-import { FetchError } from 'ofetch'
 import type { ValidationRule } from '~/core/utils/validation/rules'
-import { tValidation } from '~/core/utils/validation/messages'
+import { FetchError } from 'ofetch'
+import { reactive, ref } from 'vue'
 import { handleGlobalApiError } from '~/core/utils/handleApiError'
+import { tValidation } from '~/core/utils/validation/messages'
 
 // Backend validation error format (422): [ [field, rule, params], ... ]
 export type ValidationErrors = Array<[string, string, Array<number | string>]>
@@ -28,33 +28,44 @@ export default function useForm<
   // Validate a single field with client-side rules. Call on @blur for live feedback.
   function validateField(name: keyof TFormData): boolean {
     const rulesForField = fieldRules?.[name]
-    if (!rulesForField) return true
+
+    if (!rulesForField)
+      return true
 
     const messages: string[] = []
     for (const rule of rulesForField) {
       const result = rule(form[name])
-      if (result !== true) messages.push(result)
+
+      if (result !== true)
+        messages.push(result)
     }
 
-    if (messages.length) errors.value[name] = messages
+    if (messages.length)
+      errors.value[name] = messages
     else delete errors.value[name]
 
     return messages.length === 0
   }
 
   function validateAll(): boolean {
-    if (!fieldRules) return true
+    if (!fieldRules)
+      return true
+
     let isValid = true
     for (const name of Object.keys(fieldRules) as (keyof TFormData)[]) {
-      if (!validateField(name)) isValid = false
+      if (!validateField(name))
+        isValid = false
     }
+
     return isValid
   }
 
   async function send() {
     errors.value = {}
+
     // 1) client-side validation — don't hit the API if there are errors
-    if (!validateAll()) return
+    if (!validateAll())
+      return
 
     pending.value = true
     success.value = false

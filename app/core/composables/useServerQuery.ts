@@ -1,4 +1,5 @@
-import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
+import type { UseQueryOptions } from '@tanstack/vue-query'
+import { useQuery } from '@tanstack/vue-query'
 import { onServerPrefetch } from 'vue'
 
 // SSR + cache. For routes with ssr: true, where data must already be in the HTML.
@@ -6,6 +7,7 @@ import { onServerPrefetch } from 'vue'
 // navigation (client), so there's no `Loading…` flash either way — await it in setup.
 export async function useServerQuery<T>(options: UseQueryOptions<T>) {
   const query = useQuery(options)
+
   if (import.meta.server) {
     // SSR: finish on the server → data lands in dehydrate/HTML (SEO). Registered
     // synchronously (before any await), so server behaviour is unchanged.
@@ -17,5 +19,6 @@ export async function useServerQuery<T>(options: UseQueryOptions<T>) {
     // (hard load) the cache is warm → suspense resolves instantly, no extra request.
     await query.suspense().catch(() => {})
   }
+
   return query
 }

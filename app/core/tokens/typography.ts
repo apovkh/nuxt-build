@@ -1,8 +1,8 @@
 // Source of truth for typography. Consumed by Tailwind and Vuetify.
 export const typography = {
   fontFamily: {
-    sans: "'Montserrat', system-ui, sans-serif",
-    heading: "'Montserrat', system-ui, sans-serif",
+    sans: '\'Montserrat\', system-ui, sans-serif',
+    heading: '\'Montserrat\', system-ui, sans-serif',
   },
   fontSize: {
     xs: '12px',

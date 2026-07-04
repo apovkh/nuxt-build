@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { rules } from '~/core/utils/validation'
-import { setApiErrorNotifier } from '~/core/utils/handleApiError'
 import type { DemoErrorResult } from '~/repositories/example/useDemoErrorRepository'
+import { setApiErrorNotifier } from '~/core/utils/handleApiError'
+import { rules } from '~/core/utils/validation'
 
 definePageMeta({
   hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
@@ -32,7 +32,9 @@ onMounted(() => {
   setApiErrorNotifier((e) => {
     const id = ++toastId
     toasts.value = [{ id, statusCode: e.statusCode, message: e.message }, ...toasts.value]
-    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id) }, 4000)
+    setTimeout(() => {
+      toasts.value = toasts.value.filter(t => t.id !== id)
+    }, 4000)
   })
 })
 // Знімаємо наш notifier на виході, щоб не тримати замикання на цю сторінку.
@@ -179,8 +181,12 @@ const { form, errors, send, validateField } = useForm(
           :key="t.id"
           class="rounded border border-error/30 bg-error/10 p-3 text-sm shadow-sm"
         >
-          <div class="font-medium text-error">Global toast · {{ t.statusCode || '—' }}</div>
-          <div class="text-secondary">{{ t.message }}</div>
+          <div class="font-medium text-error">
+            Global toast · {{ t.statusCode || '—' }}
+          </div>
+          <div class="text-secondary">
+            {{ t.message }}
+          </div>
         </div>
       </TransitionGroup>
     </div>
@@ -219,12 +225,16 @@ const { form, errors, send, validateField } = useForm(
             <span :class="badge(isServerError)">isServerError</span>
           </div>
         </div>
-        <p v-else class="mt-4 text-sm text-secondary">Ще немає помилки — натисни статус вище.</p>
+        <p v-else class="mt-4 text-sm text-secondary">
+          Ще немає помилки — натисни статус вище.
+        </p>
       </section>
 
       <!-- 2) Cached query -->
       <section class="rounded border border-border p-4">
-        <h2 class="font-medium">2 · Cached query — <code class="text-primary">useClientQuery</code></h2>
+        <h2 class="font-medium">
+          2 · Cached query — <code class="text-primary">useClientQuery</code>
+        </h2>
         <p class="mt-1 text-sm text-secondary">
           Помилка живе в reactive <code>error</code> запиту; глобальний toast прилітає з
           TanStack cache (<code>vue-query</code> onError). Статус: 500.
@@ -243,12 +253,16 @@ const { form, errors, send, validateField } = useForm(
           <div><span class="text-secondary">error.statusCode:</span> <b>{{ queryErrorInfo.statusCode }}</b></div>
           <div><span class="text-secondary">error.message:</span> {{ queryErrorInfo.message }}</div>
         </div>
-        <p v-else-if="queryStarted && !queryFetching" class="mt-4 text-sm text-secondary">Без помилки.</p>
+        <p v-else-if="queryStarted && !queryFetching" class="mt-4 text-sm text-secondary">
+          Без помилки.
+        </p>
       </section>
 
       <!-- 3) Mutation -->
       <section class="rounded border border-border p-4">
-        <h2 class="font-medium">3 · Mutation — <code class="text-primary">useApiMutation</code></h2>
+        <h2 class="font-medium">
+          3 · Mutation — <code class="text-primary">useApiMutation</code>
+        </h2>
         <p class="mt-1 text-sm text-secondary">
           POST-мутація; помилка в <code>error</code> мутації, глобально нотифікує
           <code>onError</code> кешу мутацій. Статус: 500.
@@ -271,7 +285,9 @@ const { form, errors, send, validateField } = useForm(
 
       <!-- 4) Form -->
       <section class="rounded border border-border p-4">
-        <h2 class="font-medium">4 · Form — <code class="text-primary">useForm</code> (серверна валідація)</h2>
+        <h2 class="font-medium">
+          4 · Form — <code class="text-primary">useForm</code> (серверна валідація)
+        </h2>
         <p class="mt-1 text-sm text-secondary">
           Поля валідні для клієнта → запит доходить до сервера, який повертає 422. useForm мапить
           <code>[field, rule, params]</code> у <code>errors</code> без змін (тут валиться email).
@@ -287,7 +303,9 @@ const { form, errors, send, validateField } = useForm(
               class="w-full rounded border border-border px-3 py-2"
               @blur="validateLoginField('email')"
             >
-            <p v-if="loginErrors.email?.[0]" class="mt-1 text-sm text-error">{{ loginErrors.email[0] }}</p>
+            <p v-if="loginErrors.email?.[0]" class="mt-1 text-sm text-error">
+              {{ loginErrors.email[0] }}
+            </p>
           </div>
           <div>
             <label class="mb-1 block text-sm">Пароль</label>
@@ -297,7 +315,9 @@ const { form, errors, send, validateField } = useForm(
               class="w-full rounded border border-border px-3 py-2"
               @blur="validateLoginField('password')"
             >
-            <p v-if="loginErrors.password?.[0]" class="mt-1 text-sm text-error">{{ loginErrors.password[0] }}</p>
+            <p v-if="loginErrors.password?.[0]" class="mt-1 text-sm text-error">
+              {{ loginErrors.password[0] }}
+            </p>
           </div>
           <button
             type="submit"
@@ -306,15 +326,23 @@ const { form, errors, send, validateField } = useForm(
           >
             {{ loginPending ? 'Надсилаю…' : 'Увійти (отримати 422)' }}
           </button>
-          <p v-if="loginSuccess" class="text-sm text-success">Успішно ✓</p>
+          <p v-if="loginSuccess" class="text-sm text-success">
+            Успішно ✓
+          </p>
         </form>
       </section>
 
       <!-- Нотатки -->
       <section class="rounded border border-border bg-muted/40 p-4 text-sm">
-        <h2 class="font-medium">Особливі статуси</h2>
+        <h2 class="font-medium">
+          Особливі статуси
+        </h2>
         <ul class="mt-2 list-disc space-y-1 pl-5 text-secondary">
-          <li><b>401</b> → <code>createHttp.onResponseError</code> робить авторедірект на <NuxtLink to="/example-login" class="text-primary">/example-login</NuxtLink> (тому його немає серед кнопок).</li>
+          <li>
+            <b>401</b> → <code>createHttp.onResponseError</code> робить авторедірект на <NuxtLink to="/example-login" class="text-primary">
+              /example-login
+            </NuxtLink> (тому його немає серед кнопок).
+          </li>
           <li><b>422</b> у формах → <code>useForm</code> розкладає у помилки полів; решта помилок форми йдуть у глобальний хендлер.</li>
           <li>Тихий режим для конкретного запиту — <code>meta: { silent: true }</code> у його опціях.</li>
         </ul>

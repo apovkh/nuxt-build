@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { CodeTab } from '~/composables/example/usePageCode'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import type { CodeTab } from '~/composables/example/usePageCode'
 
 const route = useRoute()
 
@@ -26,13 +26,17 @@ const hasShell = computed(() => Boolean(title.value || maxWidth.value || hasCode
 
 <template>
   <!-- Page-shell -->
-  <div v-if="hasShell" :class="['mx-auto px-6 pb-6 pt-4', maxWidth || 'max-w-6xl']">
+  <div v-if="hasShell" class="mx-auto px-6 pb-6 pt-4" :class="[maxWidth || 'max-w-6xl']">
     <AppBreadcrumbs v-if="crumbs.length" :items="crumbs" />
 
     <!-- Блок: заголовок + опис -->
     <div v-if="title || subtitle" class="mb-6">
-      <h1 v-if="title" class="text-xl font-medium">{{ title }}</h1>
-      <p v-if="subtitle" class="text-secondary text-sm mt-1">{{ subtitle }}</p>
+      <h1 v-if="title" class="text-xl font-medium">
+        {{ title }}
+      </h1>
+      <p v-if="subtitle" class="text-secondary text-sm mt-1">
+        {{ subtitle }}
+      </p>
     </div>
 
     <!-- Дві колонки: ліворуч дані (slot), праворуч код -->

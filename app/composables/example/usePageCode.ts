@@ -1,4 +1,5 @@
-import { toValue, watchEffect, type MaybeRefOrGetter } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import { toValue, watchEffect } from 'vue'
 
 export interface CodeTab {
   title: string

@@ -15,8 +15,11 @@ export function setApiErrorNotifier(notify: Notifier) {
 export function handleGlobalApiError(err: unknown, opts?: { silent?: boolean }): ApiError {
   const normalized = normalizeApiError(err)
 
-  if (import.meta.dev) console.error('[API]', normalized.statusCode, normalized.message, normalized.data)
-  if (!opts?.silent) notifier?.(normalized)
+  if (import.meta.dev)
+    console.error('[API]', normalized.statusCode, normalized.message, normalized.data)
+
+  if (!opts?.silent)
+    notifier?.(normalized)
 
   return normalized
 }

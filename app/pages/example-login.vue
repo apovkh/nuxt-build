@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { login } from '~/repositories/example/auth'
 import { rules } from '~/core/utils/validation'
+import { login } from '~/repositories/example/auth'
 
 definePageMeta({
   hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
@@ -57,15 +57,21 @@ usePageCode([
     <div>
       <label class="block mb-1">Login</label>
       <input v-model="form.login" type="text" class="border rounded px-3 py-2 w-full" @blur="validateField('login')">
-      <p v-if="errors.login?.[0]" class="text-error text-sm">{{ errors.login[0] }}</p>
+      <p v-if="errors.login?.[0]" class="text-error text-sm">
+        {{ errors.login[0] }}
+      </p>
     </div>
 
     <div>
       <label class="block mb-1">Password</label>
       <input v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" @blur="validateField('password')">
-      <p v-if="errors.password?.[0]" class="text-error text-sm">{{ errors.password[0] }}</p>
+      <p v-if="errors.password?.[0]" class="text-error text-sm">
+        {{ errors.password[0] }}
+      </p>
     </div>
 
-    <button type="submit" :disabled="pending" class="bg-primary text-white rounded px-4 py-2 disabled:opacity-50">Send</button>
+    <button type="submit" :disabled="pending" class="bg-primary text-white rounded px-4 py-2 disabled:opacity-50">
+      Send
+    </button>
   </form>
 </template>

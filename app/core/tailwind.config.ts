@@ -1,6 +1,6 @@
 import type { Config } from 'tailwindcss'
 import { colors } from './tokens/colors'
-import { typography, layout } from './tokens/typography'
+import { layout, typography } from './tokens/typography'
 
 // Tailwind pulls values from tokens/* — the same source as the Vuetify theme.
 export default <Partial<Config>>{

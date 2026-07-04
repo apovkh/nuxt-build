@@ -7,7 +7,8 @@ export async function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]
   const { $http } = useNuxtApp()
   try {
     return await $http<T>(url, opts)
-  } catch (err) {
+  }
+  catch (err) {
     handleGlobalApiError(err)
     throw err
   }

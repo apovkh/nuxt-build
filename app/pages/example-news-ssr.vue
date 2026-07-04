@@ -38,11 +38,15 @@ const { data: articles, error } = await useServerQuery(news.listQuery())
 
 <template>
   <div>
-    <p v-if="error" class="text-error">{{ error.message }}</p>
+    <p v-if="error" class="text-error">
+      {{ error.message }}
+    </p>
 
     <ul v-else class="space-y-4">
       <li v-for="article in articles" :key="article.article_id" class="rounded border border-border p-4">
-        <h2 class="font-medium">{{ article.title }}</h2>
+        <h2 class="font-medium">
+          {{ article.title }}
+        </h2>
         <!-- Фіксований бокс (320×180) + object-cover резервує місце до завантаження →
              нуль CLS (картинки не стрибають). h-/w- класи потрібні, бо Tailwind
              preflight ставить img{height:auto} і перебив би атрибут height.

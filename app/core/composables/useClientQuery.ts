@@ -1,4 +1,5 @@
-import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
+import type { UseQueryOptions } from '@tanstack/vue-query'
+import { useQuery } from '@tanstack/vue-query'
 
 // Client-side cache. For an SPA admin panel: without onServerPrefetch the query doesn't run on the server,
 // and enabling it only on the client guarantees queryFn won't fire during SSR.

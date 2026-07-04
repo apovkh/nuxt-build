@@ -1,5 +1,5 @@
 import { colors, darkColors } from './colors'
-import { typography, layout } from './typography'
+import { layout, typography } from './typography'
 
 export * from './colors'
 export * from './typography'

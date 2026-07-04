@@ -33,7 +33,9 @@ const { data: posts, isPending } = useClientQuery({
 
 <template>
   <div>
-    <p v-if="isPending">Завантаження…</p>
+    <p v-if="isPending">
+      Завантаження…
+    </p>
     <ul v-else class="space-y-2">
       <li v-for="post in posts" :key="post.id">
         <NuxtLink :to="{ name: 'example-posts-id', params: { id: post.id } }" class="text-primary">
@@ -42,6 +44,8 @@ const { data: posts, isPending } = useClientQuery({
       </li>
     </ul>
 
-    <NuxtLink to="/example-posts/create" class="inline-block mt-4 text-primary">+ Create post</NuxtLink>
+    <NuxtLink to="/example-posts/create" class="inline-block mt-4 text-primary">
+      + Create post
+    </NuxtLink>
   </div>
 </template>

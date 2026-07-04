@@ -10,6 +10,7 @@ export const bookmarksRepository = {
   add(title: string): Bookmark {
     const bookmark: Bookmark = { id: crypto.randomUUID(), title }
     bookmarks.push(bookmark)
+
     return bookmark
   },
 }

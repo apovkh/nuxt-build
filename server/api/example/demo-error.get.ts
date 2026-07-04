@@ -25,6 +25,7 @@ export default defineEventHandler((event) => {
   // useForm мапить у помилки полів (error.data.forEach). Тут валиться лише email.
   if (status === 422) {
     setResponseStatus(event, 422)
+
     return [['email', 'email', []]]
   }
 

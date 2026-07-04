@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue'
 import type { ApiError } from '~/core/types'
+import { computed, ref } from 'vue'
 
 // Normalizes any error ($fetch/ofetch FetchError, Error, unknown) into a single ApiError shape.
 export function normalizeApiError(error: unknown): ApiError {
@@ -41,6 +41,7 @@ export function useApiError() {
   function handleError(err: unknown): ApiError {
     const normalized = normalizeApiError(err)
     error.value = normalized
+
     return normalized
   }
 

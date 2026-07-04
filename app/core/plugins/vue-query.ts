@@ -1,12 +1,13 @@
+import type { DehydratedState, VueQueryPluginOptions } from '@tanstack/vue-query'
 import {
-  VueQueryPlugin,
-  QueryClient,
-  QueryCache,
-  MutationCache,
-  hydrate,
   dehydrate,
-  type DehydratedState,
-  type VueQueryPluginOptions,
+
+  hydrate,
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  VueQueryPlugin,
+
 } from '@tanstack/vue-query'
 import { handleGlobalApiError } from '~/core/utils/handleApiError'
 
@@ -41,6 +42,7 @@ export default defineNuxtPlugin((nuxt) => {
       vueQueryState.value = dehydrate(queryClient)
     })
   }
+
   if (import.meta.client) {
     hydrate(queryClient, vueQueryState.value)
   }
