@@ -4,6 +4,7 @@ import { setApiErrorNotifier } from '~/core/utils/handleApiError'
 import type { DemoErrorResult } from '~/repositories/example/useDemoErrorRepository'
 
 definePageMeta({
+  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
   title: 'Обробка помилок — різні типи запитів',
   subtitle: 'Єдиний пайплайн: normalizeApiError → handleGlobalApiError → notifier (toast) + локальний useApiError для гілок по статусу. Нижче — як помилка спливає у кожному типі запиту.',
   maxWidth: 'max-w-[1600px]',

@@ -276,6 +276,13 @@ API, доступ до БД, важкі залежності, яких не хо
    плюс `object-cover`. Приклад — `news-ssr.vue`.
 4. **`window is not defined`** — звернення до браузерного API на top-level setup.
    Загорни в `import.meta.client` / `onMounted`.
+5. **Батьківський `v-if` залежить від стану, який пише дитина** — на SSR батько (layout)
+   вирішує `v-if` **раніше**, ніж дочірня сторінка встигне наповнити `useState`. Тоді SSR
+   рендерить одну гілку, а клієнт (стан уже з payload) — іншу → hydration mismatch і стрибок
+   розкладки. Було саме так із `usePageCode` + грідом у `default.vue`. Лікування: гейтити
+   структурний `v-if` на **`route.meta`** (`definePageMeta`), а не на стані від дитини —
+   мета доступна до рендеру й однакова SSR↔client. Приклад: `hasCode: true` у сторінках +
+   `computed(() => Boolean(route.meta.hasCode))` у layout.
 
 ---
 

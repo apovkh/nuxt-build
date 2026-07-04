@@ -2,6 +2,7 @@
 import type { Article } from '#shared/types/example/news'
 
 definePageMeta({
+  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
   title: 'One-off request — useApi',
   subtitle: 'Запит виконується лише за кліком, результат не кешується (перезавантаж сторінку — дані зникнуть).',
   maxWidth: 'max-w-[1600px]',

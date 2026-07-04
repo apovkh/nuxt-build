@@ -2,6 +2,7 @@
 import { listPosts } from '~/repositories/example/posts'
 
 definePageMeta({
+  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
   title: 'Posts — useClientQuery',
   subtitle: 'Той самий репозиторій, що й у формі створення, тепер як queryFn кешованого запиту.',
   maxWidth: 'max-w-[1600px]',

@@ -3,6 +3,9 @@ definePageMeta({
   title: 'SSR + cache — useServerQuery',
   subtitle: 'ssr: true · дані фетчаться на сервері й приходять у початковому HTML. Перевір view-source: заголовки вже там.',
   maxWidth: 'max-w-[1600px]',
+  // Статичний прапорець: layout малює 2-колонковий грід уже на SSR (див. default.vue),
+  // тож немає стрибка 1→2 колонки після гідрації. Пара до usePageCode нижче.
+  hasCode: true,
   breadcrumbs: [
     { title: 'Головна', to: '/' },
     { title: 'SSR + cache' },

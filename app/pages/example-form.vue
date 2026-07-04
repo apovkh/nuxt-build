@@ -2,6 +2,7 @@
 import { rules } from '~/core/utils/validation'
 
 definePageMeta({
+  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
   title: 'Demo: жива валідація',
   subtitle: 'Помилки зʼявляються/зникають на blur і на submit. Той самий errors згодиться для Vuetify.',
   maxWidth: 'max-w-[1600px]',

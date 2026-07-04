@@ -3,6 +3,7 @@ import { login } from '~/repositories/example/auth'
 import { rules } from '~/core/utils/validation'
 
 definePageMeta({
+  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
   title: 'Enter to site',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [

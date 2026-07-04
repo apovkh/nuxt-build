@@ -15,7 +15,11 @@ const maxWidth = computed(() => route.meta.maxWidth as string | undefined)
 // Код правої колонки — з usePageCode() поточної сторінки (по маршруту).
 const store = useState<Record<string, CodeTab[]>>('page-code', () => ({}))
 const code = computed(() => store.value[route.path] ?? [])
-const hasCode = computed(() => code.value.length > 0)
+// hasCode гейтимо на СТАТИЧНОМУ route.meta.hasCode: воно доступне на SSR ДО того, як
+// сторінка (дитина) через usePageCode наповнить store. Інакше layout (батько) вирішує
+// v-if раніше за дитину → SSR рендерить 1 колонку, а клієнт (payload вже повний) — 2
+// → стрибок + hydration mismatch. Фолбек на store лишаємо для клієнтської навігації.
+const hasCode = computed(() => Boolean(route.meta.hasCode) || code.value.length > 0)
 
 const hasShell = computed(() => Boolean(title.value || maxWidth.value || hasCode.value))
 </script>

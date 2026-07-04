@@ -1,5 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
+  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
   title: 'Mutation + invalidate — useApiMutation',
   subtitle: 'Додай закладку → список оновиться автоматично через invalidate: [[\'bookmarks\']]. Стор in-memory, лише для демо.',
   maxWidth: 'max-w-[1600px]',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
+  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
   title: 'Client cache — useClientQuery',
   subtitle: 'ssr: false · у view-source даних немає — вони підвантажуються запитом у браузері (вкладка Network).',
   maxWidth: 'max-w-[1600px]',
