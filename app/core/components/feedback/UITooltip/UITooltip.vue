@@ -4,7 +4,7 @@ import { mdiHelpCircleOutline } from '@mdi/js'
 defineProps<{
   /**
    * Тіло тултипа. Рендериться як HTML (v-html) — сюди можна передавати лише
-   * розмітку, автором якої є розробник або довірений бекенд (напр. прев'ю питання).
+   * розмітку, автором якої є розробник або довірений бекенд.
    * НІКОЛИ не передавай сюди сирий користувацький ввід: він виконається як скрипт.
    * Потрібен звичайний текст без розмітки — скористайся слотом.
    */
@@ -56,7 +56,8 @@ defineProps<{
 </style>
 
 <style scoped lang="scss">
-/* Question preview HTML often sets font-size on nested tags; inherit keeps one size for the whole tooltip. */
+/* Вхідна розмітка часто задає font-size на вкладених тегах; inherit тримає
+   один розмір на весь тултип. */
 .ui-tooltip__html--uniform {
   font-size: 1rem;
 }

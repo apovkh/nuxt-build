@@ -4,16 +4,18 @@
 
 ---
 
-## 0. Контекст: два застосунки в одному
+## 0. Контекст: типовий вхід
 
-| Застосунок | Стек зараз | Роль | Куди мігрує |
-|---|---|---|---|
-| `tomaxApp` | AngularJS 1.x (`ng-app="tomaxApp"`) | платформа керування іспитами | Nuxt (SSR + SPA-маршрути) |
-| `siredash` | React 19 + zustand, base `/survey` | аналітична панель | Nuxt SPA-маршрути (`/survey/*`) |
+Гайд розрахований на легасі-систему, де:
 
-Поточний стан даних: **кешування немає** — усі `$cacheFactory`/`cache:true` тільки у вендорних бібліотеках. `$http` викликається ~981 раз, `$resource` у ~98 файлах, кожен контролер фетчить незалежно. Полінг реалізований через `$interval` (Chat, ExamParticipants, ExamsTable).
+- фронт — AngularJS 1.x або рання React-SPA (часто кілька застосунків під одним доменом);
+- кешу немає: кожен контролер/компонент фетчить незалежно, а `cache: true` трапляється лише у вендорних бібліотеках;
+- запити розсипані по сотнях файлів (`$http`/`$resource`/`fetch` напряму, без транспортного шару);
+- полінг зроблений таймерами (`$interval`/`setInterval`) у самих компонентах.
 
 **Мета міграції — не паритет, а покращення:** додати кеш-шар для UX і коректний SSR для публічних потоків.
+
+Перед стартом варто скласти дві таблиці — публічні маршрути (§3.1) і закриті (§3.2); саме вони диктують `routeRules`.
 
 ---
 
@@ -39,11 +41,11 @@ export default defineNuxtConfig({
   routeRules: {
     '/accessibility/**': { prerender: true },            // SSG, індексується
     '/login/**':         { ssr: true,  robots: false },  // SSR, noindex
-    '/exam/**':          { ssr: true,  robots: false },  // etest — SSR учаснику, noindex
+    '/session/**':       { ssr: true,  robots: false },  // масовий end-user потік, noindex
     '/admin/**':         { ssr: false },                 // SPA + TanStack
-    '/bank/**':          { ssr: false },
+    '/catalog/**':       { ssr: false },
     '/users/**':         { ssr: false },
-    '/survey/**':        { ssr: false },                 // siredash-аналітика
+    '/analytics/**':     { ssr: false },
   },
 })
 ```
@@ -54,25 +56,25 @@ export default defineNuxtConfig({
 
 ### 3.1 Публічний шар → SSR/SSG + native fetch (без TanStack)
 
-| Сторінка / маршрут | Auth | Рендер | Дані | SEO |
-|---|---|---|---|---|
-| `accessibility-statement` (eng/heb) | ні | **SSG** | нема | ✅ index + hreflang |
-| `tomax_login` / `tomax_ldap_login` | ні | **SSR** | `$fetch` на submit | `noindex` |
-| `tomax_otp`, `tomax_user_role`, `password-recovery*` | ні | **SSR** | `$fetch` | `noindex` |
-| `etest_frame` `/etest/{id}`, `exam_file_preview` | токен/лінк | **SSR** | native `useAsyncData` по токену | `noindex` |
+Заповни таблицю під свою систему — по рядку на маршрут:
 
-`etest` (проходження іспиту) — єдиний масовий end-user потік, SSR критичний для швидкого й доступного першого екрана. TanStack тут не потрібен.
+| Тип сторінки | Auth | Рендер | Дані | SEO |
+|---|---|---|---|---|
+| Статичний контент (правова інформація, лендинги) | ні | **SSG** (`prerender`) | нема | ✅ index + hreflang |
+| Форми входу / відновлення пароля / OTP | ні | **SSR** | `$fetch` на submit | `noindex` |
+| Доступ за токеном чи одноразовим лінком | токен | **SSR** | native `useAsyncData` по токену | `noindex` |
+
+Масовий end-user потік (те, заради чого систему відкривають найчастіше) тримай на SSR: перший екран має бути швидким і доступним без JS. TanStack тут не потрібен.
 
 ### 3.2 Закрита адмінка → SPA (`ssr: false`) + TanStack кеш
 
-| Маршрут | Що це | Підхід до даних |
-|---|---|---|
-| `main.exam_manager` `/exam-manager/{id}` | таблиця іспитів | `useClientQuery` + полінг (`refetchInterval`) |
-| `main.exam_builder` / `main.exam_redactor` | конструктор/редактор | кеш + оптимістичні мутації |
-| `main.grade_frame` `/grade/{id}` | оцінювання | кеш |
-| `root.bank_*` (manager/editor/exam/question/block builder) | банк питань | lookup-дані зі `staleTime`, спільні `queryKey` |
-| `users`, `users.item` | адмін користувачів | кеш + `invalidateQueries` |
-| `siredash` `/survey/*` | аналітика (Dashboard, Trends, Faculty, Reports) | **головний кандидат** — важкі агрегації, фільтри, кеш обов'язковий |
+| Тип маршруту | Підхід до даних |
+|---|---|
+| Табличні списки, що змінюються в реальному часі | `useClientQuery` + полінг (`refetchInterval`) |
+| Конструктори/редактори сутностей | кеш + оптимістичні мутації |
+| Довідники й lookup-дані | довгий `staleTime`, спільні `queryKey` |
+| Адміністрування користувачів і ролей | кеш + `invalidateQueries` після мутацій |
+| Аналітика й звіти | **головний кандидат** — важкі агрегації та фільтри, кеш обов'язковий |
 
 SEO тут нульове (за логіном) → `ssr: false`, TanStack на повну.
 
@@ -166,16 +168,16 @@ export function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]) {
 // composables/queries.ts
 import { queryOptions } from '@tanstack/vue-query'
 
-export const examsQuery = () => queryOptions({
-  queryKey: ['exams'],
-  queryFn: () => $fetch('/api/exams'),
-  refetchInterval: 15_000, // замість $interval у ExamsTable
+export const ordersQuery = () => queryOptions({
+  queryKey: ['orders'],
+  queryFn: () => $fetch('/api/orders'),
+  refetchInterval: 15_000, // замість таймера-полінга в самій таблиці
 })
 
 export const statusesQuery = () => queryOptions({
-  queryKey: ['bank', 'statuses'],
-  queryFn: () => $fetch('/bank/status'),
-  staleTime: Infinity, // lookup-дані: одна вибірка на сесію (було $resource у кожній модалці)
+  queryKey: ['catalog', 'statuses'],
+  queryFn: () => $fetch('/api/catalog/statuses'),
+  staleTime: Infinity, // lookup-дані: одна вибірка на сесію (було по запиту в кожній модалці)
 })
 ```
 
@@ -184,11 +186,11 @@ export const statusesQuery = () => queryOptions({
 ```vue
 <script setup lang="ts">
 // адмінка (SPA)
-const { data: exams } = useClientQuery(examsQuery())
+const { data: orders } = useClientQuery(ordersQuery())
 
 const { mutate: changeStatus } = useApiMutation({
-  mutationFn: (body) => $fetch('/bank/change-status', { method: 'POST', body }),
-  invalidate: [['exams']],
+  mutationFn: (body) => $fetch('/api/orders/change-status', { method: 'POST', body }),
+  invalidate: [['orders']],
 })
 </script>
 ```
@@ -212,14 +214,14 @@ useSeoMeta({
 ```
 
 - Модулі: `@nuxtjs/sitemap`, `@nuxtjs/robots`.
-- Мультимовність (HEB/ENG/RUS): `@nuxtjs/i18n` з `hreflang` і локальними URL.
-- `robots: false` у `routeRules` для login/exam — публічні, але не для індексації.
+- Мультимовність: `@nuxtjs/i18n` з `hreflang` і локалізованими URL.
+- `robots: false` у `routeRules` для маршрутів, які публічно доступні, але не для індексації (логін, доступ за токеном).
 
 ---
 
 ## 6. GEO (Generative Engine Optimization) — відкладено
 
-Наразі публічного контентного шару (лендинг, блог, публічні результати) немає, тож GEO **немає на чому застосовувати**. Єдине, що індексується, — статичні accessibility-сторінки, і їм досить SSG + коректних мета.
+Якщо публічного контентного шару (лендинг, блог, публічні звіти) ще немає, GEO **немає на чому застосовувати**: коли індексуються лише статичні сторінки, їм досить SSG + коректних мета.
 
 Повернутися до GEO, коли з'явиться публічний контент. Тоді, поверх того ж SSR: structured data (schema.org / JSON-LD), семантично чистий server-rendered HTML (AI-краулери погано виконують JS), за потреби `llms.txt`. Окремої «GEO-архітектури» не існує — це якісний SEO + структуровані дані.
 
@@ -228,17 +230,17 @@ useSeoMeta({
 ## 7. Порядок міграції (рекомендований)
 
 1. Каркас Nuxt + `routeRules` + плагін `vue-query.ts` + 4 composables.
-2. Публічний шар (найпростіший, найбільша цінність для end-user): accessibility → login-flow → `etest` (проходження іспиту, SSR).
-3. Адмінка модулями, від простого до складного: `users` → `exam_manager` → `bank_*` → `exam_builder`/`redactor`.
-4. Аналітика `siredash` `/survey/*` — портувати як SPA-розділ з TanStack (тут кеш дає найбільше).
-5. Замінити всі `$interval`-полінги на `refetchInterval`; усі `$http.post` → `useApiMutation` з `invalidate`.
+2. Публічний шар (найпростіший, найбільша цінність для end-user): статичні сторінки → login-flow → основний end-user потік на SSR.
+3. Адмінка модулями, від простого до складного: спершу довідники й керування користувачами, далі списки, наостанок конструктори/редактори.
+4. Аналітика — портувати як SPA-розділ з TanStack (тут кеш дає найбільше).
+5. Замінити всі таймерні полінги на `refetchInterval`; усі прямі POST-виклики → `useApiMutation` з `invalidate`.
 
 ---
 
 ## Резюме
 
 - **Кеш і SEO — різні задачі.** Не розв'язуй SEO кешем.
-- **Публічні потоки** (accessibility, login, etest) → SSR/SSG + native fetch + мета.
+- **Публічні потоки** (статичні сторінки, логін, основний end-user флоу) → SSR/SSG + native fetch + мета.
 - **Закрита адмінка й аналітика** → SPA (`ssr: false`) + TanStack кеш.
 - **GEO** відкласти до появи публічного контенту.
 - Один Nuxt, два режими через `routeRules`.

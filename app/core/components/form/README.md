@@ -1,10 +1,15 @@
 # form/
 
-> **Це дорожня карта, а не опис наявного.** Реалізовано в цій папці: нічого.
-> Решта рядків таблиці — заплановане; оцінки годин лишилися з вихідного проєкту.
+Обгортка форми, групування полів і сабміт.
 
-| `UIValidation` | ✓ | 0 | renderless | Передає `rules` + `model-value` через scoped slot |
-| `UIForm` | … | 12 | `VForm` | `v-model:valid`, defaults, submit handler з prevention |
-| `UIFormField` | … | 6 | composite | Label + hint + error wrapper для масових форм адмінки |
-| `UIFieldset` | … | 2 | `<fieldset>` + slots | Group of related fields with title |
-| `UISubmitBtn` | … | 2 | `UIBtn` + form ctx | Auto-disabled while invalid/loading |
+**Реалізовано:** нічого.
+
+Нижче — план, а не опис наявного.
+
+| Component | Vuetify base | Що додає |
+| --- | --- | --- |
+| `UIValidation` | renderless | Передає `rules` + `model-value` через scoped slot |
+| `UIForm` | `VForm` | `v-model:valid`, дефолти, submit-хендлер із prevention |
+| `UIFormField` | composite | Обгортка label + hint + error для довгих форм |
+| `UIFieldset` | `<fieldset>` + slots | Група пов'язаних полів із заголовком |
+| `UISubmitBtn` | `UIBtn` + контекст форми | Авто-disabled, поки форма невалідна або в польоті |

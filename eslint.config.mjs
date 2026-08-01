@@ -1,5 +1,5 @@
 // @ts-check
-// Лінтер-сетап бази (перенесено з TomaGradeVue/geolab): antfu-пресет + Nuxt.
+// Лінтер-сетап бази: antfu-пресет + Nuxt.
 // У nuxt.config обов'язково: modules: ['@nuxt/eslint'] + eslint: { config: { standalone: false } }.
 import antfu from '@antfu/eslint-config'
 import withNuxt from './.nuxt/eslint.config.mjs'

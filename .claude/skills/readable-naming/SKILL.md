@@ -86,8 +86,8 @@ export function useNewsRepository() {
    `props`, `emit`, `opts`, `i`/`j` for tight loop counters, `el` for a DOM
    element, `db`, `url`, `t` for the i18n translate fn, `v` for a single-line
    validation-rule argument, and `vars`/`ctx`/`data` inside TanStack callbacks.
-4. **Read like a phrase.** A boolean reads as a yes/no question (`isOnlineExam`),
-   a function reads as a verb phrase (`fetchRubrics`, `normalizeApiError`), a
+4. **Read like a phrase.** A boolean reads as a yes/no question (`isBookmarked`),
+   a function reads as a verb phrase (`fetchArticles`, `normalizeApiError`), a
    collection reads as a plural noun (`bookmarks`, `validationErrors`).
 5. **Length matches scope.** A 2-line loop body can use `i`; a value living across
    a 200-line component earns a full descriptive name. Wider scope → more words.
@@ -101,7 +101,7 @@ export function useNewsRepository() {
    suffix for lookup maps (`postsById`); `Dto` suffix for transport payloads.
 8. **Cut noise words and redundant context.** Drop `data`, `info`, `object`,
    `value`, `manager`, `the` when they add nothing: `userData` → `user`,
-   `examInfo` → `exam`. Inside `useNewsRepository`, prefer `getAll` over
+   `articleInfo` → `article`. Inside `useNewsRepository`, prefer `getAll` over
    `getAllNews` — the repo already says "news".
 9. **Prefer positive booleans.** `isEnabled` over `isNotDisabled`; read the
    condition without mentally inverting it.
@@ -144,7 +144,7 @@ list              → validationErrors
 ok                → isValid
 fn                → notify
 arr               → bookmarks
-getData()         → fetchRubrics()  /  getAll()
+getData()         → fetchArticles()  /  getAll()
 tmpUsr            → currentUser
 cfg               → coreConfig
 IApiError         → ApiError          (no I prefix here)
