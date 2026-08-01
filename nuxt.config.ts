@@ -6,7 +6,7 @@ import { coreNuxtConfig } from './app/core/nuxt.core.config'
 
 // Проектні налаштування мержаться з ядром (coreNuxtConfig) через defu:
 // defu глибоко об'єднує обʼєкти й КОНКАТЕНУЄ масиви (css/plugins/imports/components),
-// тож ядрові плагіни ($api, vue-query), auto-import composables та tokens/tailwind
+// тож ядрові плагіни ($api, vue-query, vuetify), auto-import composables та tokens/tailwind
 // підключаються разом із проектними значеннями. База — другим аргументом.
 // Preload найкритичнішого шрифту (upright Montserrat) → менше FOUT: браузер тягне
 // .woff2 одразу з <head>, паралельно з CSS. Guarded: <link> додається, ЛИШЕ коли файл
