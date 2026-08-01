@@ -29,16 +29,46 @@ const forms = [
       Кожна сторінка демонструє свій composable ядра для сценарію SSR true / false.
     </p>
 
+    <section class="mt-6">
+      <h2 class="text-lg font-semibold">
+        Дизайн-система
+      </h2>
+      <p class="text-sm">
+        Кольори й типографіка ядра — одне джерело для Vuetify і Tailwind.
+      </p>
+      <NuxtLink
+        to="/tokens"
+        class="mt-3 flex items-center gap-4 rounded border border-border p-4 transition hover:border-brand-primary"
+      >
+        <div class="flex shrink-0 gap-1.5">
+          <span class="size-8 rounded bg-brand-secondary" />
+          <span class="size-8 rounded bg-brand-primary" />
+          <span class="size-8 rounded bg-brand-primary-200" />
+          <span class="size-8 rounded bg-brand-accent" />
+          <span class="size-8 rounded bg-brand-accent-600" />
+        </div>
+        <div>
+          <div class="font-medium">
+            Design tokens
+          </div>
+          <code class="text-sm text-brand-primary">~/core/tokens</code>
+          <div class="mt-1 text-xs">
+            палітра квадратами · текст різними кольорами й розмірами · перемикач теми
+          </div>
+        </div>
+      </NuxtLink>
+    </section>
+
     <ul class="mt-6 grid gap-3 sm:grid-cols-2">
       <li v-for="example in examples" :key="example.to">
         <NuxtLink
           :to="example.to"
-          class="block rounded border border-border p-4 transition hover:border-primary"
+          class="block rounded border border-border p-4 transition hover:border-brand-primary"
         >
           <div class="font-medium">
             {{ example.title }}
           </div>
-          <code class="text-sm text-primary">{{ example.composable }}</code>
+          <code class="text-sm text-brand-primary">{{ example.composable }}</code>
           <div class="mt-1 text-xs">
             {{ example.note }}
           </div>
@@ -57,12 +87,12 @@ const forms = [
         <li v-for="form in forms" :key="form.to">
           <NuxtLink
             :to="form.to"
-            class="block rounded border border-border p-4 transition hover:border-primary"
+            class="block rounded border border-border p-4 transition hover:border-brand-primary"
           >
             <div class="font-medium">
               {{ form.title }}
             </div>
-            <code class="text-sm text-primary">{{ form.composable }}</code>
+            <code class="text-sm text-brand-primary">{{ form.composable }}</code>
             <div class="mt-1 text-xs">
               {{ form.note }}
             </div>
