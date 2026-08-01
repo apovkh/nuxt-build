@@ -23,7 +23,7 @@ async function copy() {
       <span class="text-sm font-medium">{{ title }}</span>
       <button
         type="button"
-        class="text-xs rounded border border-border px-2 py-1 transition hover:border-primary"
+        class="text-xs rounded border border-border px-2 py-1 transition hover:border-brand-primary"
         @click="copy"
       >
         {{ copied ? 'Скопійовано ✓' : 'Копіювати' }}

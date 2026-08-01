@@ -61,7 +61,7 @@ async function load() {
 <template>
   <div>
     <button
-      class="rounded bg-primary px-4 py-2 text-white disabled:opacity-50"
+      class="rounded bg-brand-primary px-4 py-2 text-white disabled:opacity-50"
       :disabled="pending"
       @click="load"
     >

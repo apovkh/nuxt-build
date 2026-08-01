@@ -195,7 +195,7 @@ const { form, errors, send, validateField } = useForm(
       <!-- 1) One-off -->
       <section class="rounded border border-border p-4">
         <h2 class="font-medium">
-          1 · One-off — <code class="text-primary">useApi</code> + <code class="text-primary">useApiError</code>
+          1 · One-off — <code class="text-brand-primary">useApi</code> + <code class="text-brand-primary">useApiError</code>
         </h2>
         <p class="mt-1 text-sm text-secondary">
           Клік → запит з обраним статусом. useApi нотифікує глобально (toast) і кидає далі;
@@ -207,7 +207,7 @@ const { form, errors, send, validateField } = useForm(
             v-for="s in STATUSES"
             :key="s"
             type="button"
-            class="rounded border border-border px-3 py-1.5 text-sm transition hover:border-primary disabled:opacity-50"
+            class="rounded border border-border px-3 py-1.5 text-sm transition hover:border-brand-primary disabled:opacity-50"
             :disabled="oncePending"
             @click="runOnce(s)"
           >
@@ -233,7 +233,7 @@ const { form, errors, send, validateField } = useForm(
       <!-- 2) Cached query -->
       <section class="rounded border border-border p-4">
         <h2 class="font-medium">
-          2 · Cached query — <code class="text-primary">useClientQuery</code>
+          2 · Cached query — <code class="text-brand-primary">useClientQuery</code>
         </h2>
         <p class="mt-1 text-sm text-secondary">
           Помилка живе в reactive <code>error</code> запиту; глобальний toast прилітає з
@@ -242,7 +242,7 @@ const { form, errors, send, validateField } = useForm(
 
         <button
           type="button"
-          class="mt-3 rounded bg-primary px-4 py-2 text-sm text-white disabled:opacity-50"
+          class="mt-3 rounded bg-brand-primary px-4 py-2 text-sm text-white disabled:opacity-50"
           :disabled="queryFetching"
           @click="runQuery"
         >
@@ -261,7 +261,7 @@ const { form, errors, send, validateField } = useForm(
       <!-- 3) Mutation -->
       <section class="rounded border border-border p-4">
         <h2 class="font-medium">
-          3 · Mutation — <code class="text-primary">useApiMutation</code>
+          3 · Mutation — <code class="text-brand-primary">useApiMutation</code>
         </h2>
         <p class="mt-1 text-sm text-secondary">
           POST-мутація; помилка в <code>error</code> мутації, глобально нотифікує
@@ -270,7 +270,7 @@ const { form, errors, send, validateField } = useForm(
 
         <button
           type="button"
-          class="mt-3 rounded bg-primary px-4 py-2 text-sm text-white disabled:opacity-50"
+          class="mt-3 rounded bg-brand-primary px-4 py-2 text-sm text-white disabled:opacity-50"
           :disabled="mutationPending"
           @click="runMutation()"
         >
@@ -286,7 +286,7 @@ const { form, errors, send, validateField } = useForm(
       <!-- 4) Form -->
       <section class="rounded border border-border p-4">
         <h2 class="font-medium">
-          4 · Form — <code class="text-primary">useForm</code> (серверна валідація)
+          4 · Form — <code class="text-brand-primary">useForm</code> (серверна валідація)
         </h2>
         <p class="mt-1 text-sm text-secondary">
           Поля валідні для клієнта → запит доходить до сервера, який повертає 422. useForm мапить
@@ -321,7 +321,7 @@ const { form, errors, send, validateField } = useForm(
           </div>
           <button
             type="submit"
-            class="rounded bg-primary px-4 py-2 text-sm text-white disabled:opacity-50"
+            class="rounded bg-brand-primary px-4 py-2 text-sm text-white disabled:opacity-50"
             :disabled="loginPending"
           >
             {{ loginPending ? 'Надсилаю…' : 'Увійти (отримати 422)' }}
@@ -339,7 +339,7 @@ const { form, errors, send, validateField } = useForm(
         </h2>
         <ul class="mt-2 list-disc space-y-1 pl-5 text-secondary">
           <li>
-            <b>401</b> → <code>createHttp.onResponseError</code> робить авторедірект на <NuxtLink to="/example-login" class="text-primary">
+            <b>401</b> → <code>createHttp.onResponseError</code> робить авторедірект на <NuxtLink to="/example-login" class="text-brand-primary">
               /example-login
             </NuxtLink> (тому його немає серед кнопок).
           </li>

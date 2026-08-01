@@ -87,7 +87,7 @@ usePageCode([
       </p>
     </div>
 
-    <button type="submit" :disabled="pending" class="bg-primary text-white rounded px-4 py-2 disabled:opacity-50">
+    <button type="submit" :disabled="pending" class="bg-brand-primary text-white rounded px-4 py-2 disabled:opacity-50">
       Send
     </button>
   </form>
