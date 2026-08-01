@@ -20,6 +20,8 @@ export default function useForm<
   fieldRules?: FieldRules<TFormData>,
 ) {
   const form = reactive(formData) as TFormData
+  // Знімок до будь-яких правок — reactive(formData) мутує сам formData.
+  const initialValues = { ...formData }
   // errors as string[] — compatible with Vuetify :error-messages. For a plain input use errors.x?.[0].
   const errors = ref<FieldErrors<TFormData>>({})
   const pending = ref(false)
@@ -78,9 +80,11 @@ export default function useForm<
     catch (error) {
       const status = error instanceof FetchError ? (error.statusCode ?? error.response?.status) : undefined
 
-      // 2) server-side validation (422) — same errors map, same messages
+      // 2) server-side validation (422) — same errors map, same messages.
+      // Обидва контракти: сирий масив як тіло (examples) і createError({ data })
+      // з h3, де ofetch кладе тіло під error.data → масив опиняється в error.data.data.
       if (error instanceof FetchError && status === 422) {
-        const validationErrors = error.data as ValidationErrors
+        const validationErrors = (error.data?.data ?? error.data) as ValidationErrors
         validationErrors?.forEach(([field, rule, params]) => {
           if (field in form) {
             errors.value[field as keyof TFormData] = [tValidation(rule, params)]
@@ -98,7 +102,9 @@ export default function useForm<
   }
 
   function reset() {
-    Object.assign(form, formData)
+    // З initialValues, а не з formData: form === reactive(formData), тобто те саме
+    // джерело, і Object.assign(form, formData) не скидав би нічого.
+    Object.assign(form, initialValues)
     errors.value = {}
     success.value = false
   }
