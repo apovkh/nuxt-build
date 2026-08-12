@@ -5,12 +5,12 @@
 // is fine — unlike statusMessage, which ends up in the ASCII-only reason phrase
 // and would be mangled. normalizeApiError reads the text from the body (err.data.message).
 const STATUS_MESSAGES: Record<number, string> = {
-  400: 'Некоректний запит',
-  401: 'Не авторизовано',
-  403: 'Доступ заборонено',
-  404: 'Ресурс не знайдено',
-  422: 'Дані не пройшли валідацію',
-  500: 'Внутрішня помилка сервера',
+  400: 'Bad request',
+  401: 'Unauthorized',
+  403: 'Access denied',
+  404: 'Resource not found',
+  422: 'Validation failed',
+  500: 'Internal server error',
 }
 
 export default defineEventHandler((event) => {
@@ -18,7 +18,7 @@ export default defineEventHandler((event) => {
 
   // No status (or 200) — successful response.
   if (status === 200) {
-    return { ok: true, message: 'Запит успішний' }
+    return { ok: true, message: 'Request successful' }
   }
 
   // 422 → a raw [field, rule, params] array as the ENTIRE response body: this exact format
@@ -32,6 +32,6 @@ export default defineEventHandler((event) => {
   // All other statuses — via createError: message goes into the body (err.data.message),
   // where normalizeApiError picks it up. statusMessage is deliberately not set —
   // h3 recommends message for long texts (the reason phrase stays standard).
-  const message = STATUS_MESSAGES[status] ?? `Помилка ${status}`
+  const message = STATUS_MESSAGES[status] ?? `Error ${status}`
   throw createError({ statusCode: status, message, data: { message } })
 })

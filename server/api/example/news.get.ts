@@ -16,7 +16,7 @@ export default defineEventHandler(async (event): Promise<Article[]> => {
     // to the client. Log the details on the server and return a clean 502, which the client-side
     // normalizeApiError renders as a meaningful message (error UI of the news pages).
     console.error('[news] upstream newsdata.io failed:', (err as Error)?.message)
-    const message = 'Сервіс новин тимчасово недоступний. Спробуйте пізніше.'
+    const message = 'The news service is temporarily unavailable. Please try again later.'
     throw createError({ statusCode: 502, message, data: { message } })
   }
 })
