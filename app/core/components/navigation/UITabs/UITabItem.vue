@@ -4,13 +4,13 @@ import { UI_TABS_KEY } from './UITabs.types'
 
 const props = defineProps<UITabItemProps>()
 
-// Таб може бути і кнопкою (v-model), і посиланням (роутинг) — тому component :is.
+// A tab can be either a button (v-model) or a link (routing) — hence component :is.
 const NuxtLink = resolveComponent('NuxtLink')
 
-// null-фолбек: айтем не падає поза UITabs (наприклад, у стилгайді/сторібуці).
+// null fallback: the item doesn't crash outside UITabs (e.g. in a styleguide/storybook).
 const tabs = inject(UI_TABS_KEY, null)
 
-// Розмір задається один раз на контейнері; проп на айтемі — точковий override.
+// Size is set once on the container; the prop on the item is a targeted override.
 const sizeComputed = computed(() => props.size ?? tabs?.size.value ?? 'default')
 
 const isSelected = computed(() => {

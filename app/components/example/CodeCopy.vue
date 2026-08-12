@@ -12,7 +12,7 @@ async function copy() {
     setTimeout(() => (copied.value = false), 1500)
   }
   catch {
-    // clipboard недоступний (http/непідтримка) — тихо ігноруємо
+    // clipboard unavailable (http/unsupported) — ignore silently
   }
 }
 </script>

@@ -90,8 +90,8 @@ const mergedAttrs = computed(() => {
   delete rest.style
   delete rest['aria-label']
 
-  // Однойменні пропси перебивають сирі attrs — але лише коли їх реально передали.
-  // Інакше aria-pressed/aria-expanded, передані як attrs, просто зникали б.
+  // Same-named props override raw attrs — but only when they were actually passed.
+  // Otherwise aria-pressed/aria-expanded passed as attrs would simply vanish.
   if (props.ariaPressed !== undefined)
     delete rest['aria-pressed']
 
@@ -164,8 +164,8 @@ const mergedAttrs = computed(() => {
     transition: opacity 0.3s ease-in-out !important;
   }
 
-  // Білий outlined на світлій поверхні: текст лишається темним (читабельність),
-  // hover — м'яка заливка, бо власний overlay Vuetify на світлому майже не видно.
+  // White outlined on a light surface: the text stays dark (readability),
+  // hover is a soft fill, since Vuetify's own overlay is barely visible on light.
   &.v-btn--variant-outlined.text-white:not(.ui-btn--dark) {
     @apply text-primary;
 
@@ -174,10 +174,10 @@ const mergedAttrs = computed(() => {
     }
   }
 
-  // Prop `dark` — outlined на темній поверхні: білий текст, приглушена рамка,
-  // напівпрозорий білий hover. Білий беремо з токена `surface` (#fff): утиліту
-  // text-white тут застосувати не можна — у файлі є селектор .text-white,
-  // і Tailwind бачить у цьому циклічну залежність.
+  // Prop `dark` — outlined on a dark surface: white text, muted border,
+  // semi-transparent white hover. White comes from the `surface` token (#fff): the
+  // text-white utility can't be used here — the file has a .text-white selector,
+  // and Tailwind sees that as a circular dependency.
   &.v-btn--variant-outlined.ui-btn--dark {
     @apply border-surface/25 text-surface;
 

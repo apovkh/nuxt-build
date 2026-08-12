@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Article } from '#shared/types/example/news'
 
-// Нативний Nuxt-варіант (для контрасту з core-composables нижче):
-// useFetch — SSR + перенос payload на клієнт, АЛЕ без TanStack-кешу/інвалідації.
+// Native Nuxt variant (for contrast with the core composables below):
+// useFetch — SSR + payload transfer to the client, BUT no TanStack cache/invalidation.
 const { data: articles } = await useFetch<Article[]>('/api/example/news')
 
 const examples = [

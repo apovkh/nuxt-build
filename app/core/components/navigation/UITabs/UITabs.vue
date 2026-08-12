@@ -18,8 +18,8 @@ const props = withDefaults(defineProps<{
 
 const modelValue = defineModel<UITabValue>()
 
-// Стан і колбек віддаємо через inject, щоб айтеми працювали і зі слота,
-// і з items[] без прокидання пропсів на кожен таб.
+// State and callback are exposed via inject so items work both from the slot
+// and from items[] without threading props through every tab.
 provide(UI_TABS_KEY, {
   modelValue,
   variant: toRef(props, 'variant'),
@@ -29,8 +29,8 @@ provide(UI_TABS_KEY, {
   },
 })
 
-// Скролбар схований (див. .no-scrollbar), тому єдина підказка, що таби
-// скролляться на вузьких екранах, — градієнтні тіні по краях.
+// The scrollbar is hidden (see .no-scrollbar), so the only hint that the tabs
+// scroll on narrow screens is the gradient shadows at the edges.
 const scrollRef = ref<HTMLElement | null>(null)
 const { arrivedState, x } = useScroll(scrollRef)
 
@@ -44,8 +44,8 @@ const updateCanScroll = () => {
 
 useResizeObserver(scrollRef, updateCanScroll)
 
-// Самого resize замало: коли міняється склад табів, ширина контейнера лишається
-// тією самою, а скрол з'являється/зникає — і тіні по краях застигали б.
+// Resize alone isn't enough: when the set of tabs changes, the container width
+// stays the same while the scroll appears/disappears — and the edge shadows would freeze.
 watch(() => props.items, () => nextTick(updateCanScroll), { deep: true })
 
 const showStartShadow = computed(() => canScroll.value && !arrivedState.left && x.value > 0)
@@ -103,8 +103,8 @@ const showEndShadow = computed(() => canScroll.value && !arrivedState.right)
 }
 
 .ui-tabs__loader {
-  // !important — перебиває інлайн-позиціонування VProgressLinear,
-  // щоб лоадер ліг усередині рамки табів, а не по зовнішньому краю.
+  // !important — overrides VProgressLinear's inline positioning,
+  // so the loader sits inside the tabs border rather than along the outer edge.
   position: absolute;
   top: 2px !important;
   left: 4px;

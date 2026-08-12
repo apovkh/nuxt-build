@@ -1,6 +1,6 @@
 import type { Article } from '#shared/types/example/news'
 
-// Тонкий роут: читає приватний ключ і делегує серверному репозиторію (server/repositories).
+// Thin route: reads the private key and delegates to the server repository (server/repositories).
 export default defineEventHandler(async (event): Promise<Article[]> => {
   const { newsApiKey } = useRuntimeConfig(event)
 
@@ -12,9 +12,9 @@ export default defineEventHandler(async (event): Promise<Article[]> => {
     return await newsRepository.fetchLatest(newsApiKey)
   }
   catch (err) {
-    // Зовнішній newsdata.io впав (500/таймаут тощо) — не пропускаємо «голий» апстрім-стек
-    // у клієнт. Логуємо деталі на сервері й віддаємо чистий 502, який клієнтський
-    // normalizeApiError покаже осмисленим message (error-UI сторінок новин).
+    // External newsdata.io failed (500/timeout etc.) — don't leak the raw upstream stack
+    // to the client. Log the details on the server and return a clean 502, which the client-side
+    // normalizeApiError renders as a meaningful message (error UI of the news pages).
     console.error('[news] upstream newsdata.io failed:', (err as Error)?.message)
     const message = 'Сервіс новин тимчасово недоступний. Спробуйте пізніше.'
     throw createError({ statusCode: 502, message, data: { message } })

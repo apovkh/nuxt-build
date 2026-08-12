@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Нативні breadcrumbs (Vuetify не встановлено). Коли додаси Vuetify — заміниш на <VBreadcrumbs :items>.
+// Native breadcrumbs (Vuetify is not installed). Once you add Vuetify — replace with <VBreadcrumbs :items>.
 defineProps<{ items: { title: string, to?: string }[] }>()
 </script>
 

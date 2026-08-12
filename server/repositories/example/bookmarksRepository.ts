@@ -1,7 +1,7 @@
 import type { Bookmark } from '#shared/types/example/bookmarks'
 
-// Серверний data-access ресурсу "bookmarks" — in-memory demo store.
-// Стан на рівні модуля → спільний між запитами, скидається при рестарті сервера. Лише для демо.
+// Server-side data access for the "bookmarks" resource — in-memory demo store.
+// Module-level state → shared between requests, reset on server restart. Demo only.
 const bookmarks: Bookmark[] = []
 
 export const bookmarksRepository = {

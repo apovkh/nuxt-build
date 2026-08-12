@@ -22,8 +22,8 @@ export interface LinkInfo {
 
 const EXTERNAL_URL_REGEX = /^(?:https?:\/\/|\/\/)/i
 
-// Базa для розбору відносних шляхів через URL(). Ніколи не потрапляє у вивід:
-// для внутрішніх посилань повертаємо лише pathname+search+hash.
+// Base for parsing relative paths via URL(). Never makes it into the output:
+// for internal links we return only pathname+search+hash.
 const PLACEHOLDER_ORIGIN = 'http://localhost'
 
 export const useLinkResolver = (options: LinkResolverOptions = {}) => {
@@ -81,9 +81,9 @@ export const useLinkResolver = (options: LinkResolverOptions = {}) => {
       return baseUrl
     }
 
-    // Фіктивний origin, а не window.location — buildHref викликається з computed у UILink,
-    // тобто і на сервері. Для внутрішніх шляхів origin усе одно відкидається нижче,
-    // а для зовнішніх URL baseUrl несе власний origin і base ігнорується.
+    // A placeholder origin, not window.location — buildHref is called from a computed in UILink,
+    // i.e. on the server too. For internal paths the origin is dropped below anyway,
+    // and for external URLs baseUrl carries its own origin and the base is ignored.
     const url = new URL(baseUrl, PLACEHOLDER_ORIGIN)
 
     Object.entries(query).forEach(([key, value]) => {

@@ -4,14 +4,14 @@ import { fileURLToPath } from 'node:url'
 import { defu } from 'defu'
 import { coreNuxtConfig } from './app/core/nuxt.core.config'
 
-// Проектні налаштування мержаться з ядром (coreNuxtConfig) через defu:
-// defu глибоко об'єднує обʼєкти й КОНКАТЕНУЄ масиви (css/plugins/imports/components),
-// тож ядрові плагіни ($api, vue-query, vuetify), auto-import composables та tokens/tailwind
-// підключаються разом із проектними значеннями. База — другим аргументом.
-// Preload найкритичнішого шрифту (upright Montserrat) → менше FOUT: браузер тягне
-// .woff2 одразу з <head>, паралельно з CSS. Guarded: <link> додається, ЛИШЕ коли файл
-// реально існує в /public/fonts — інакше був би 404 + "preloaded but not used".
-// Публічний (нехешований) шлях і робить статичний preload можливим — з бандла ні.
+// Project settings merge with the core (coreNuxtConfig) via defu:
+// defu deep-merges objects and CONCATENATES arrays (css/plugins/imports/components),
+// so the core plugins ($api, vue-query, vuetify), auto-import composables and tokens/tailwind
+// are wired up together with the project values. The base goes as the second argument.
+// Preload the most critical font (upright Montserrat) → less FOUT: the browser fetches
+// the .woff2 right from <head>, in parallel with CSS. Guarded: the <link> is added ONLY when
+// the file actually exists in /public/fonts — otherwise it'd be a 404 + "preloaded but not used".
+// The public (unhashed) path is what makes a static preload possible — a bundled one can't.
 const CRITICAL_FONT = 'Montserrat-Variable.woff2'
 const fontPreload = existsSync(fileURLToPath(new URL(`./public/fonts/${CRITICAL_FONT}`, import.meta.url)))
   ? [{ rel: 'preload', as: 'font', type: 'font/woff2', href: `/fonts/${CRITICAL_FONT}`, crossorigin: 'anonymous' }]
@@ -24,47 +24,47 @@ export default defineNuxtConfig(
       devtools: { enabled: true },
       ssr: true,
 
-      // Preload критичного шрифту з <head> (fontPreload вище). Ядро не задає app, тож
-      // defu просто додає це; коли шрифт відсутній — масив порожній, нічого не рендериться.
+      // Preload the critical font from <head> (fontPreload above). The core doesn't set app,
+      // so defu simply adds this; when the font is missing the array is empty and nothing renders.
       app: { head: { link: [...fontPreload] } },
 
-      // Інлайнити CSS у HTML (замість окремого <link>). Проектний CSS крихітний
-      // (~3 KB gzip), тож економимо render-blocking round-trip на першому показі, а
-      // втрата крос-сторінкового кешу мізерна. У dev Nuxt однаково інлайн вимикає.
+      // Inline CSS into the HTML (instead of a separate <link>). The project CSS is tiny
+      // (~3 KB gzip), so we save a render-blocking round-trip on first paint, while the
+      // loss of cross-page caching is negligible. In dev Nuxt disables inlining anyway.
       features: { inlineStyles: true },
 
       modules: ['@nuxt/image', '@nuxtjs/tailwindcss', '@nuxt/eslint'],
 
-      // ESLint: antfu-пресет несе власні інстанси плагінів — standalone: false
-      // прибирає дублікати з nuxt-конфіга (інакше конфлікт plugin "import").
+      // ESLint: the antfu preset ships its own plugin instances — standalone: false
+      // removes the duplicates from the nuxt config (otherwise plugin "import" conflicts).
       eslint: { config: { standalone: false } },
 
-      // Проектна папка компонентів. Ядро задає свою ~/core/components і цим заміщує дефолт,
-      // тож ~/components повертаємо тут; defu сконкатенує обидві.
+      // Project components folder. The core sets its own ~/core/components, which replaces
+      // the default, so ~/components is re-added here; defu concatenates both.
       components: ['~/components'],
 
-      // Проектні data-access репозиторії. Шлях відносно srcDir (app/) → app/repositories.
-      // '**' підхоплює вкладену repositories/example (демо-репозиторії). composables/example —
-      // showcase-composable usePageCode (дефолтний auto-import сканує лише верхній рівень).
-      // defu конкатенує з ядровими imports.dirs, тож use*Repository auto-import'яться.
+      // Project data-access repositories. Path is relative to srcDir (app/) → app/repositories.
+      // '**' picks up the nested repositories/example (demo repositories). composables/example —
+      // the showcase composable usePageCode (the default auto-import scans only the top level).
+      // defu concatenates with the core imports.dirs, so use*Repository get auto-imported.
       imports: { dirs: ['repositories', 'repositories/**', 'composables/example'] },
 
-      // Серверний data-access шар. Nitro автоімпортує лише server/utils за замовчуванням,
-      // тож server/repositories реєструємо явно → newsRepository/bookmarksRepository у роутах.
-      // '**' підхоплює вкладену server/repositories/example (демо).
+      // Server data-access layer. Nitro auto-imports only server/utils by default,
+      // so server/repositories is registered explicitly → newsRepository/bookmarksRepository in routes.
+      // '**' picks up the nested server/repositories/example (demo).
       nitro: { imports: { dirs: ['server/repositories', 'server/repositories/**'] } },
 
       runtimeConfig: {
-        // Приватний ключ, лише на сервері. Overridable через NUXT_NEWS_API_KEY.
+        // Private key, server-only. Overridable via NUXT_NEWS_API_KEY.
         newsApiKey: process.env.NEWS_API_KEY,
         public: {
-          // baseURL для $api (core/plugins/api.ts). '/api' → useApi('/example/news') б'є у /api/example/news.
+          // baseURL for $api (core/plugins/api.ts). '/api' → useApi('/example/news') hits /api/example/news.
           apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
         },
       },
 
       routeRules: {
-        // Приклад SPA-маршруту: рендериться лише на клієнті (демо useClientQuery).
+        // Example SPA route: rendered on the client only (useClientQuery demo).
         '/example-news-spa': { ssr: false },
       },
     },

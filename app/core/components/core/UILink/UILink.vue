@@ -83,9 +83,9 @@ const computedHref = computed(() => {
   return props.query ? buildHref(baseHref, props.query) : baseHref
 })
 
-// RouterLink отримує props.to як є, тож без цього `query` мовчки губився б саме
-// для внутрішніх посилань — найчастішого випадку. Булеві значення приводимо до
-// рядка: LocationQueryRaw їх не приймає.
+// RouterLink receives props.to as is, so without this `query` would be silently lost
+// precisely for internal links — the most common case. Booleans are coerced to
+// strings: LocationQueryRaw doesn't accept them.
 const routerLinkTo = computed<RouteLocationRaw | undefined>(() => {
   if (!props.to || !props.query) {
     return props.to
@@ -143,9 +143,9 @@ const handleClick = (event: MouseEvent) => {
     return
   }
 
-  // Гілка на props.to, а не на computedHref: для об'єктного маршруту
-  // ({ name: 'posts' }) analyzeLinkType повертає href: '', і на computedHref
-  // wrapper-режим просто не спрацьовував би.
+  // Branch on props.to, not on computedHref: for an object route
+  // ({ name: 'posts' }) analyzeLinkType returns href: '', so keying on computedHref
+  // would simply never trigger wrapper mode.
   if (props.wrapper && props.to) {
     event.preventDefault()
 
@@ -153,9 +153,9 @@ const handleClick = (event: MouseEvent) => {
 
     if (href && (linkInfo.value.isExternal || linkInfo.value.isMailTo || linkInfo.value.isTel)) {
       if (computedTarget.value && isTargetValid.value) {
-        // 'noopener,noreferrer' саме як window features: rel-атрибут із getSecurityAttrs
-        // на програмний window.open не поширюється, і сторінка отримала б живий
-        // window.opener (reverse tabnabbing).
+        // 'noopener,noreferrer' specifically as window features: the rel attribute from
+        // getSecurityAttrs doesn't apply to a programmatic window.open, and the page
+        // would get a live window.opener (reverse tabnabbing).
         window.open(href, computedTarget.value, 'noopener,noreferrer')
       }
       else {
@@ -176,8 +176,8 @@ const restAttrs = computed(() => {
 })
 
 const commonAttrs = computed(() => ({
-  // aria-label лише коли його справді передали: інакше він перебиває видимий текст
-  // посилання, і скрінрідер читає підпис замість вмісту.
+  // aria-label only when it was actually passed: otherwise it overrides the link's
+  // visible text, and the screen reader announces the label instead of the content.
   ...(props.name !== undefined && { 'aria-label': props.name }),
   'data-test-id': props.testId,
   'data-id': 'ui-link',
@@ -198,7 +198,7 @@ const wrapperAttrs = computed(() => ({
   ...restAttrs.value,
   ...commonAttrs.value,
   role: 'link',
-  // Стиль споживача зберігаємо — курсор лише додаємо зверху.
+  // Preserve the consumer's style — the cursor is only layered on top.
   style: [$attrs.style, props.disabled ? undefined : { cursor: 'pointer' }],
 }))
 

@@ -4,7 +4,7 @@ import { setApiErrorNotifier } from '~/core/utils/handleApiError'
 import { rules } from '~/core/utils/validation'
 
 definePageMeta({
-  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
+  hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Обробка помилок — різні типи запитів',
   subtitle: 'Єдиний пайплайн: normalizeApiError → handleGlobalApiError → notifier (toast) + локальний useApiError для гілок по статусу. Нижче — як помилка спливає у кожному типі запиту.',
   maxWidth: 'max-w-[1600px]',
@@ -16,14 +16,14 @@ definePageMeta({
 
 const demo = useDemoErrorRepository()
 
-// 401 навмисно немає серед кнопок: він тригерить авторедірект на /login
-// (createHttp.onResponseError) і забрав би користувача зі сторінки.
+// 401 is deliberately missing from the buttons: it triggers an auto-redirect to /login
+// (createHttp.onResponseError) and would take the user away from the page.
 const STATUSES = [400, 403, 404, 422, 500] as const
 
-// ── Глобальний notifier → toasts ─────────────────────────────────────────────
-// У ядрі setApiErrorNotifier ніде не викликається (лише в README). Підключаємо його
-// на клієнті, щоб зробити глобальний крок видимим: усе, що доходить до
-// handleGlobalApiError (useApi, TanStack cache), спливає як toast.
+// ── Global notifier → toasts ─────────────────────────────────────────────────
+// The core never calls setApiErrorNotifier anywhere (only in the README). We hook
+// it up on the client to make the global step visible: everything that reaches
+// handleGlobalApiError (useApi, TanStack cache) pops up as a toast.
 interface DemoToast { id: number, statusCode: number, message: string }
 const toasts = ref<DemoToast[]>([])
 let toastId = 0
@@ -37,7 +37,7 @@ onMounted(() => {
     }, 4000)
   })
 })
-// Знімаємо наш notifier на виході, щоб не тримати замикання на цю сторінку.
+// Remove our notifier on the way out so we don't keep a closure over this page.
 onBeforeUnmount(() => setApiErrorNotifier(() => {}))
 
 // ── 1) One-off: useApi + useApiError ─────────────────────────────────────────
@@ -59,10 +59,10 @@ async function runOnce(status: number) {
   resetOnceError()
   oncePending.value = true
   try {
-    await demo.requestOnce(status) // useApi: глобальний toast + re-throw
+    await demo.requestOnce(status) // useApi: global toast + re-throw
   }
   catch (e) {
-    captureOnceError(e) // локальний стан + бейджі по статусу
+    captureOnceError(e) // local state + per-status badges
   }
   finally {
     oncePending.value = false
@@ -76,7 +76,7 @@ function badge(active: boolean) {
 }
 
 // ── 2) Cached query: useClientQuery ──────────────────────────────────────────
-// enabled: false → запит стартує лише вручну через refetch().
+// enabled: false → the query starts only manually via refetch().
 const {
   error: queryError,
   isFetching: queryFetching,
@@ -100,9 +100,9 @@ const {
 
 const mutationErrorInfo = computed(() => (mutationError.value ? normalizeApiError(mutationError.value) : null))
 
-// ── 4) Form: useForm + серверна валідація (422 → помилки полів) ───────────────
-// Значення валідні для клієнта → запит доходить до сервера, який повертає 422 з
-// масивом [field, rule, params]. useForm мапить його в errors без жодних змін.
+// ── 4) Form: useForm + server-side validation (422 → field errors) ───────────
+// The values pass client validation → the request reaches the server, which returns
+// 422 with a [field, rule, params] array. useForm maps it into errors unchanged.
 const {
   form: loginForm,
   errors: loginErrors,
@@ -123,11 +123,11 @@ const {
 usePageCode([
   {
     title: 'Пайплайн (ядро)',
-    code: `// normalizeApiError: будь-що → { statusCode, message, data }
+    code: `// normalizeApiError: anything → { statusCode, message, data }
 // handleGlobalApiError: normalize → log → notifier (toast).
-// Викликається глобально з TanStack cache і з useApi.
+// Called globally from the TanStack cache and from useApi.
 
-// Підключення toast (зазвичай раз у плагіні):
+// Wiring up the toast (usually once, in a plugin):
 setApiErrorNotifier((e) => useNuxtApp().$toast.error(e.message))`,
   },
   {
@@ -141,27 +141,27 @@ async function runOnce(status: number) {
     await demo.requestOnce(status) // useApi: toast + re-throw
   }
   catch (e) {
-    handleError(e) // локальний стан + гілки по статусу
+    handleError(e) // local state + per-status branches
   }
 }`,
   },
   {
     title: '2 · useClientQuery / 3 · useApiMutation',
-    code: `// Кешований запит: помилка в reactive error, toast — з TanStack cache
+    code: `// Cached query: the error lives in reactive error, the toast comes from the TanStack cache
 const { error, refetch } = useClientQuery({
   ...demo.statusQuery(500), enabled: false,
 })
 
-// Мутація: error у стані + onError → handleGlobalApiError (toast)
+// Mutation: error in state + onError → handleGlobalApiError (toast)
 const { mutate, error } = useApiMutation({
   mutationFn: () => demo.request(500),
 })`,
   },
   {
     title: '4 · useForm (422 → поля)',
-    code: `// Той самий errors: клієнтські rules + серверний 422
+    code: `// The same errors: client-side rules + server-side 422
 const { form, errors, send, validateField } = useForm(
-  () => demo.request(422), // сервер віддає [[field, rule, params]]
+  () => demo.request(422), // the server returns [[field, rule, params]]
   { email: 'user@example.com', password: 'secret123' },
   undefined,
   { email: [rules.required, rules.email],
@@ -173,7 +173,7 @@ const { form, errors, send, validateField } = useForm(
 
 <template>
   <div>
-    <!-- Глобальні toasts — результат setApiErrorNotifier → handleGlobalApiError -->
+    <!-- Global toasts — the result of setApiErrorNotifier → handleGlobalApiError -->
     <div class="pointer-events-none fixed right-4 top-4 z-50 w-72 space-y-2">
       <TransitionGroup name="fade">
         <div
@@ -332,7 +332,7 @@ const { form, errors, send, validateField } = useForm(
         </form>
       </section>
 
-      <!-- Нотатки -->
+      <!-- Notes -->
       <section class="rounded border border-border bg-muted/40 p-4 text-sm">
         <h2 class="font-medium">
           Особливі статуси

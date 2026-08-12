@@ -3,9 +3,9 @@ import { useEventListener, useResizeObserver } from '@vueuse/core'
 import { computed, nextTick, onMounted, ref } from 'vue'
 
 /**
- * Форма VDataTable-групи (Vuetify не експортує свій Group публічно).
- * Поля мають збігатися з Vuetify один-в-один: isGroupOpen/toggleGroup у слот-скоупі
- * типізовані через Group, і вужчий тип не пройшов би за контраваріантністю параметра.
+ * Shape of a VDataTable group (Vuetify doesn't export its Group publicly).
+ * Fields must match Vuetify one-to-one: isGroupOpen/toggleGroup in the slot scope
+ * are typed via Group, and a narrower type wouldn't pass due to parameter contravariance.
  */
 interface TableGroup {
   type: 'group'
@@ -16,7 +16,7 @@ interface TableGroup {
   items: readonly any[]
 }
 
-/** Скоуп слота VDataTable, звідки беремо доступ до груп. */
+/** VDataTable slot scope that gives us access to the groups. */
 export interface GroupSlotScope {
   groupedItems?: readonly any[]
   isGroupOpen?: (group: TableGroup) => boolean
@@ -25,10 +25,10 @@ export interface GroupSlotScope {
 
 const isGroup = (node: any): node is TableGroup => node?.type === 'group'
 
-// groupedItems «сплющений» за станом розгортання — закрита група приходить одним
-// вузлом. Але її .items тримає повне піддерево незалежно від стану, тож рекурсія
-// по .items знаходить і вкладені групи. Дедуплікуємо за id: розгорнута група
-// трапляється і як окремий запис, і всередині батьківського .items.
+// groupedItems is "flattened" by expansion state — a closed group arrives as a single
+// node. But its .items holds the full subtree regardless of state, so recursing
+// through .items finds nested groups too. Deduplicate by id: an expanded group
+// appears both as a standalone entry and inside its parent's .items.
 function collectGroups(nodes: readonly any[] | undefined, acc = new Map<string, TableGroup>()) {
   nodes?.forEach((node) => {
     if (isGroup(node)) {
@@ -41,14 +41,14 @@ function collectGroups(nodes: readonly any[] | undefined, acc = new Map<string, 
 }
 
 /**
- * Розгортання/згортання всіх груп таблиці. Працює через публічний слот-скоуп
- * VDataTable (groupedItems / isGroupOpen / toggleGroup) — без доступу до внутрішніх
- * інжектів Vuetify. Скоуп треба передати з будь-якого слота, що його отримує
- * (у UITable це #top).
+ * Expand/collapse all table groups. Works through the public VDataTable
+ * slot scope (groupedItems / isGroupOpen / toggleGroup) — no access to Vuetify's
+ * internal injects. The scope must be passed in from any slot that receives it
+ * (in UITable that's #top).
  */
 export function useGrouped() {
-  // Скоуп тримаємо поза реактивністю: setScope викликається під час рендера слота,
-  // і реактивне сховище утворило б цикл рендер → зміна → рендер.
+  // Keep the scope outside reactivity: setScope is called during slot render,
+  // and a reactive store would create a render → change → render loop.
   let scope: GroupSlotScope | null = null
   const isAnyOpened = ref(false)
 
@@ -56,8 +56,8 @@ export function useGrouped() {
 
   const syncOpenState = () => {
     const isGroupOpen = scope?.isGroupOpen
-    // Присвоєння тим самим значенням нічого не тригерить, тож стан сходиться
-    // за один прохід і після ручного розгортання окремої групи теж.
+    // Assigning the same value triggers nothing, so the state converges
+    // in a single pass — including after manually expanding an individual group.
     isAnyOpened.value = !!isGroupOpen && listGroups().some(group => isGroupOpen(group))
   }
 
@@ -73,7 +73,7 @@ export function useGrouped() {
     if (!isGroupOpen || !toggleGroup)
       return
 
-    // Напрямок фіксуємо до першого перемикання — toggleGroup міняє стан під час обходу.
+    // Lock the direction before the first toggle — toggleGroup mutates state mid-iteration.
     const shouldOpen = !isAnyOpened.value
 
     listGroups().forEach((group) => {
@@ -115,8 +115,8 @@ export function useTableDimmer(tableRef: Ref<any>) {
       showScrollDimmer.value = scrollWidth > clientWidth && (scrollWidth - clientWidth - scrollLeft > 1)
     }
 
-    // Обидві висоти скидаємо в '0px', коли відповідного слота немає — інакше
-    // дімер лишався б зі старим офсетом на таблиці без top/footer.
+    // Reset both heights to '0px' when the corresponding slot is absent — otherwise
+    // the dimmer would keep a stale offset on a table without top/footer.
     const topSlot = el.querySelector<HTMLElement>('.ui-table__top')
     tableHeaderHeight.value = topSlot ? `${topSlot.offsetHeight}px` : '0px'
 
@@ -124,9 +124,9 @@ export function useTableDimmer(tableRef: Ref<any>) {
     tableFooterHeight.value = footer ? `${footer.offsetHeight}px` : '0px'
   }
 
-  // Спостерігачі реєструються на верхньому рівні setup — усередині onMounted/watch
-  // у VueUse немає активного effect scope, тож вони ніколи не знімалися б,
-  // а кожна зміна $el додавала б ще один на відчепленому вузлі.
+  // Observers are registered at the top level of setup — inside onMounted/watch
+  // VueUse has no active effect scope, so they would never be cleaned up,
+  // and every $el change would add another one on a detached node.
   useResizeObserver(rootEl, updateDimmer)
   useResizeObserver(wrapperEl, updateDimmer)
   useEventListener(wrapperEl, 'scroll', updateDimmer)

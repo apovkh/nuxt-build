@@ -21,6 +21,6 @@ export interface UITabsContext {
   updateModelValue: (value: UITabValue) => void
 }
 
-// Типізований ключ, щоб контракт provide/inject між UITabs і UITabItem
-// перевірявся компілятором, а не збігом рядків.
+// Typed key so the provide/inject contract between UITabs and UITabItem
+// is checked by the compiler rather than by string matching.
 export const UI_TABS_KEY: InjectionKey<UITabsContext> = Symbol('ui-tabs')

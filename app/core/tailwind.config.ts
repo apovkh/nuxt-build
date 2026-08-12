@@ -2,26 +2,26 @@ import type { Config } from 'tailwindcss'
 import { colors } from './tokens/colors'
 import { layout, typography } from './tokens/typography'
 
-// hex #rrggbb → 'r,g,b' — щоб зібрати rgba() з різною альфою на щаблях тіні
-// з одного токена кольору (тіні потребують rgba, а токен — hex).
+// hex #rrggbb → 'r,g,b' — to build rgba() with a different alpha per shadow step
+// from a single color token (shadows need rgba, the token is hex).
 function channels(hex: string): string {
   const n = Number.parseInt(hex.slice(1), 16)
 
   return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`
 }
-// Ink тіней — brand-secondary. Тінь лишається темною в обох темах, тож беремо
-// фіксований брендовий колір, а не семантичний токен, що перевертається.
+// Shadow ink is brand-secondary. A shadow stays dark in both themes, so we take
+// the fixed brand color rather than a semantic token that flips.
 const shadowInk = channels(colors['brand-secondary'])
 
-// Кожен токен віддаємо як посилання на CSS-змінну теми Vuetify, а не як hex.
-// Vuetify друкує їх трійками "R,G,B" на .v-theme--light / .v-theme--dark, тож
-// один і той самий клас (bg-surface, text-primary) перемикається разом із
-// темою. З hex-значеннями Tailwind-утиліти були б статичні й у темній темі
-// давали б, наприклад, темний текст на темному тлі.
-// <alpha-value> зберігає модифікатори прозорості: bg-brand-primary/10 працює як завжди.
-// Саме rgba(..., a), а НЕ rgb(... / a): Vuetify друкує канали через кому
-// ("2,48,71"), а слеш-синтаксис вимагає пробілів — rgb(2,48,71/1) не парситься
-// зовсім, і колір мовчки падає в inherit (чорний).
+// Each token is exposed as a reference to the Vuetify theme's CSS variable, not as hex.
+// Vuetify prints them as "R,G,B" triplets on .v-theme--light / .v-theme--dark, so
+// one and the same class (bg-surface, text-primary) switches together with the
+// theme. With hex values the Tailwind utilities would be static and in the dark
+// theme would give, say, dark text on a dark background.
+// <alpha-value> keeps the opacity modifiers: bg-brand-primary/10 works as usual.
+// Specifically rgba(..., a), NOT rgb(... / a): Vuetify prints the channels comma-separated
+// ("2,48,71"), while the slash syntax requires spaces — rgb(2,48,71/1) doesn't parse
+// at all, and the color silently falls back to inherit (black).
 const themeColors = Object.fromEntries(
   Object.keys(colors).map(key => [key, `rgba(var(--v-theme-${key}), <alpha-value>)`]),
 ) as Record<keyof typeof colors, string>
@@ -39,10 +39,10 @@ export default <Partial<Config>>{
       borderRadius: {
         DEFAULT: layout.radius,
       },
-      // Шкала тіней: один ink-колір (brand-secondary з токена) на всіх щаблях,
-      // зростання розмиття+насиченості sm→xl,
-      // тож тіні читаються як єдина система. sm — контур, md — картка (спокій),
-      // lg — підняття/ховер, xl — оверлеї (тостер, поповери, модалки).
+      // Shadow scale: one ink color (brand-secondary from the token) on every step,
+      // blur+intensity growing sm→xl,
+      // so the shadows read as a single system. sm — outline, md — card (at rest),
+      // lg — lift/hover, xl — overlays (toaster, popovers, modals).
       boxShadow: {
         sm: `0 1px 2px rgba(${shadowInk},0.05)`,
         md: `0 1px 2px rgba(${shadowInk},0.05), 0 10px 30px -18px rgba(${shadowInk},0.16)`,

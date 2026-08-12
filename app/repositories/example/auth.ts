@@ -9,7 +9,7 @@ export interface LoginResult {
   token: string
 }
 
-// Репозиторій = прямі функції. Імпортуються в компонент і передаються у useForm/useQuery.
+// Repository = plain functions. Imported into a component and passed to useForm/useQuery.
 export function login(body: LoginDto) {
   const http = useHttp()
 

@@ -2,7 +2,7 @@
 import { listPosts } from '~/repositories/example/posts'
 
 definePageMeta({
-  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
+  hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Posts — useClientQuery',
   subtitle: 'Той самий репозиторій, що й у формі створення, тепер як queryFn кешованого запиту.',
   maxWidth: 'max-w-[1600px]',
@@ -22,7 +22,7 @@ usePageCode([
     title: 'useClientQuery + repo',
     code: `import { listPosts } from '~/repositories/example/posts'
 
-// той самий репозиторій, що й у формі — як queryFn
+// the same repository as in the form — as queryFn
 const { data: posts, isPending } = useClientQuery({
   queryKey: ['posts'],
   queryFn: listPosts,

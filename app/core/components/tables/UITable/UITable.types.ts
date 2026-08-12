@@ -1,4 +1,4 @@
-// Заголовки таблиці — сумісні з VDataTable headers.
+// Table headers — compatible with VDataTable headers.
 export interface UITableHeader {
   key?: string
   title?: string

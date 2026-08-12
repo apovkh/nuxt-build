@@ -46,8 +46,8 @@ export const useScrollExtended = (elRef: ComputedOrRef<HTMLElement | undefined |
     arrivedBottom: true,
   })
 
-  // Позиція краю оновлюється на кожен скрол; наявність скролбара — лише коли
-  // могли змінитися розміри (елемент, resize, ререндер вмісту).
+  // The edge position updates on every scroll; scrollbar presence — only when
+  // the dimensions could have changed (element, resize, content re-render).
   const syncArrived = () => {
     const el = elRef.value
 
@@ -80,8 +80,8 @@ export const useScrollExtended = (elRef: ComputedOrRef<HTMLElement | undefined |
   watch(elRef, sync, { immediate: true })
   useResizeObserver(elRef, sync)
 
-  // Ререндер вмісту (додались/зникли рядки) міняє scrollHeight, не чіпаючи розмір
-  // самого контейнера — resize туди не долітає, і стан тіней застигав би.
+  // A content re-render (rows added/removed) changes scrollHeight without touching the
+  // container's own size — resize never fires there, and the shadow state would go stale.
   onUpdated(sync)
 
   const scrollToEnd = (direction: 'x' | 'y') => {

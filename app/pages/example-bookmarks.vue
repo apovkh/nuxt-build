@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
+  hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Mutation + invalidate — useApiMutation',
   subtitle: 'Додай закладку → список оновиться автоматично через invalidate: [[\'bookmarks\']]. Стор in-memory, лише для демо.',
   maxWidth: 'max-w-[1600px]',
@@ -10,7 +10,7 @@ definePageMeta({
   ],
 })
 
-// Читання і мутація — через useBookmarksRepository. Після успіху invalidate рефетчить список.
+// Reads and the mutation go through useBookmarksRepository. After success, invalidate refetches the list.
 const bookmarksRepo = useBookmarksRepository()
 
 const { data: bookmarks, isPending } = useClientQuery(bookmarksRepo.listQuery())
@@ -37,10 +37,10 @@ usePageCode([
     title: 'useApiMutation',
     code: `const repo = useBookmarksRepository()
 
-// читання — кешований запит
+// read — cached query
 const { data: bookmarks } = useClientQuery(repo.listQuery())
 
-// мутація + автоінвалідація списку після успіху
+// mutation + auto-invalidation of the list after success
 const { mutate: add, isPending } = useApiMutation({
   mutationFn: repo.create,
   invalidate: [['bookmarks']],

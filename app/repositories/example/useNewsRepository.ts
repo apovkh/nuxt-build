@@ -2,17 +2,17 @@ import type { Article } from '#shared/types/example/news'
 import { queryOptions } from '@tanstack/vue-query'
 
 /**
- * Репозиторій ресурсу "news" — єдина точка доступу до даних новин.
- * Конвенція методів: `*Query()` → кешовані (queryOptions, TanStack); прості дієслова
- * (`getAll`) → сирі/разові виклики. SSR vs клієнт вирішує сторінка композаблом.
+ * Repository for the "news" resource — the single access point to news data.
+ * Method convention: `*Query()` → cached (queryOptions, TanStack); plain verbs
+ * (`getAll`) → raw/one-off calls. SSR vs client is decided by the page via a composable.
  */
 export function useNewsRepository() {
   const getAll = () => useApi<Article[]>('/example/news')
 
   return {
-    /** Статичний / разовий read без кешу → useApi або прямий await. */
+    /** Static / one-off read without cache → useApi or a direct await. */
     getAll,
-    /** Кешований read (queryOptions). SSR → useServerQuery, клієнт → useClientQuery. */
+    /** Cached read (queryOptions). SSR → useServerQuery, client → useClientQuery. */
     listQuery: () => queryOptions({ queryKey: ['news'], queryFn: getAll }),
   }
 }

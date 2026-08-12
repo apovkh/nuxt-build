@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<{
   searchValue?: string
   expanded?: any[]
   useClickRow?: boolean
-  /** Варіанти per-page для дропдауна футера. `-1` — «Всі». */
+  /** Per-page options for the footer dropdown. `-1` — the "All" option. */
   itemsPerPageOptions?: number[]
 }>(), {
   items: () => [],
@@ -45,8 +45,8 @@ const props = withDefaults(defineProps<{
   itemsPerPageOptions: () => [25, 50, 100, -1],
 })
 
-// update:itemsPerPage / update:page тут не оголошуємо — їх уже декларує defineModel
-// нижче, і подвійна декларація лише плодить дублікати.
+// update:itemsPerPage / update:page are not declared here — defineModel below
+// already declares them, and a double declaration would only breed duplicates.
 const emit = defineEmits<{
   (e: 'update:expanded', value: any[]): void
   (e: 'click:row', value: { item: any, [key: string]: any }): void
@@ -93,9 +93,9 @@ const computedSlots = computed<Record<string, any>>(() => {
     }
   })
 
-  // Порожній об'єкт слотів Vuetify трактує як «слотів немає» і малює дефолти,
-  // тож віддаємо заглушку. Ключ навмисне не `_` — так зветься службовий прапорець
-  // стабільності слотів у Vue.
+  // Vuetify treats an empty slots object as "no slots" and renders the defaults,
+  // so we return a stub. The key is deliberately not `_` — that's the name of Vue's
+  // internal slot-stability flag.
   if (Object.keys(result).length === 0) {
     return { 'ui-table-noop': () => null }
   }
@@ -157,9 +157,9 @@ const {
   setScope,
 } = useGrouped()
 
-// Кнопка «розгорнути все» живе у #header.data-table-group, а цей слот бачить лише
-// свій стовпчик. groupedItems/toggleGroup дає VDataTableSlotProps, який приходить
-// у #top — звідси renderless-компонент, що просто передає скоуп у composable.
+// The "expand all" button lives in #header.data-table-group, and that slot only sees
+// its own column. groupedItems/toggleGroup come from VDataTableSlotProps, which arrives
+// in #top — hence a renderless component that simply hands the scope to the composable.
 const GroupScopeCapture = (props: { scope: GroupSlotScope }) => {
   setScope(props.scope)
 
@@ -467,7 +467,7 @@ watch([showSelect, groupBy, showExpand], () => {
 .ui-table {
   position: relative;
 
-  /* Дімер справа сигналізує, що таблиця скролиться горизонтально */
+  /* The dimmer on the right signals that the table scrolls horizontally */
   &::after {
     transition: all 0.2s;
     visibility: hidden;

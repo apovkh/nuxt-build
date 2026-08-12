@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// Вітрина токенів — читає ~/core/tokens, тобто те саме джерело, що й тема Vuetify
-// і Tailwind. Квадрати заливаються через --v-theme-*, а не через hex: так сторінка
-// заразом перевіряє, що токен реально доїхав у тему й перемикається в темній.
+// Token showcase — reads ~/core/tokens, i.e. the same source as the Vuetify theme
+// and Tailwind. Swatches are filled via --v-theme-*, not via hex: this way the page
+// also verifies that a token actually made it into the theme and flips in dark mode.
 import { mdiWeatherNight, mdiWeatherSunny } from '@mdi/js'
 import { useTheme } from 'vuetify'
 import {
@@ -34,7 +34,7 @@ const isDark = computed(() => theme.name.value === 'dark')
 interface Swatch {
   name: string
   light: string
-  /** Значення в темній темі — лише коли воно відрізняється від світлого. */
+  /** Dark-theme value — only when it differs from the light one. */
   dark: string | null
 }
 
@@ -60,8 +60,8 @@ function swatchStyle(name: string) {
   return { backgroundColor: `rgb(var(--v-theme-${name}))` }
 }
 
-// Класи тут — рядкові літерали, бо Tailwind сканує вихідний код: динамічний
-// `text-${name}` у збірку не потрапив би.
+// Classes here are string literals because Tailwind scans the source code: a dynamic
+// `text-${name}` would never make it into the build.
 const textColors = [
   { cls: 'text-primary', note: 'заголовки, основний текст' },
   { cls: 'text-secondary', note: 'підписи, hint, вторинний текст' },
@@ -74,7 +74,7 @@ const textColors = [
   { cls: 'text-brand-accent-600', note: 'акцент / CTA' },
 ]
 
-// Шкала, яку віддає Tailwind (tokens/typography → aggregate `typography`).
+// The scale Tailwind exposes (tokens/typography → aggregate `typography`).
 const tailwindSizes = [
   { cls: 'text-xs', px: typography.fontSize.xs },
   { cls: 'text-sm', px: typography.fontSize.sm },
@@ -90,8 +90,8 @@ const weights = [
   { cls: 'font-bold', value: FONT_WEIGHT.bold },
 ]
 
-// DS-шкала (base = 14px) — окрема від Tailwind-шкали (base = 16px), тож рендеримо
-// її інлайновими стилями просто зі значень токена.
+// The DS scale (base = 14px) is separate from the Tailwind scale (base = 16px), so we
+// render it with inline styles straight from the token values.
 const dsSizes = Object.entries(FONT_SIZE).map(([name, [size, { lineHeight }]]) => ({
   name,
   size,
@@ -127,7 +127,7 @@ const sample = 'Швидка руда лисиця 0123'
       </UIBtn>
     </div>
 
-    <!-- ── Кольори ──────────────────────────────────────────────────────── -->
+    <!-- ── Colors ───────────────────────────────────────────────────────── -->
     <section v-for="group in colorGroups" :key="group.title" class="flex flex-col gap-3">
       <div>
         <h2 class="text-lg font-semibold text-primary">
@@ -164,7 +164,7 @@ const sample = 'Швидка руда лисиця 0123'
       </ul>
     </section>
 
-    <!-- ── Текст: кольори ───────────────────────────────────────────────── -->
+    <!-- ── Text: colors ─────────────────────────────────────────────────── -->
     <section class="flex flex-col gap-3">
       <div>
         <h2 class="text-lg font-semibold text-primary">
@@ -184,7 +184,7 @@ const sample = 'Швидка руда лисиця 0123'
       </ul>
     </section>
 
-    <!-- ── Текст: розміри ───────────────────────────────────────────────── -->
+    <!-- ── Text: sizes ──────────────────────────────────────────────────── -->
     <section class="flex flex-col gap-3">
       <div>
         <h2 class="text-lg font-semibold text-primary">
@@ -216,7 +216,7 @@ const sample = 'Швидка руда лисиця 0123'
       </div>
     </section>
 
-    <!-- ── Текст: насиченість ───────────────────────────────────────────── -->
+    <!-- ── Text: weights ────────────────────────────────────────────────── -->
     <section class="flex flex-col gap-3">
       <h2 class="text-lg font-semibold text-primary">
         Текст — насиченість
@@ -230,7 +230,7 @@ const sample = 'Швидка руда лисиця 0123'
       </ul>
     </section>
 
-    <!-- ── Заголовки ────────────────────────────────────────────────────── -->
+    <!-- ── Headings ─────────────────────────────────────────────────────── -->
     <section class="flex flex-col gap-3">
       <div>
         <h2 class="text-lg font-semibold text-primary">

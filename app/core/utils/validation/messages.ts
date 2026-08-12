@@ -21,8 +21,8 @@ const MESSAGES: Record<string, (p?: Params) => string> = {
   unique: () => 'Таке значення вже додано',
 }
 
-// Позиційні імена параметрів для контракту 422: бекенд шле params масивом
-// ([field, rule, [20]]), а повідомлення читають іменовані ключі (p.max).
+// Positional parameter names for the 422 contract: the backend sends params as an array
+// ([field, rule, [20]]), while the messages read named keys (p.max).
 const POSITIONAL_PARAM_NAMES: Record<string, string[]> = {
   maxLength: ['max'],
   minLength: ['min'],

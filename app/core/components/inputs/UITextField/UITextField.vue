@@ -148,7 +148,7 @@ defineExpose({
       <slot name="hint" />
     </template>
 
-    <!-- fieldAttrs — id + aria-* із UILabel: саме вони зв'язують <label> із інпутом. -->
+    <!-- fieldAttrs — id + aria-* from UILabel: they are what ties the <label> to the input. -->
     <template #default="fieldAttrs">
       <!-- eslint-disable vue/custom-event-name-casing -->
       <VTextField
@@ -209,8 +209,8 @@ defineExpose({
     min-height: 36px;
   }
 
-  // Коли поле розтягнуте вище за min-height (flex-рядок з кнопкою),
-  // Vuetify лишає input зверху — центруємо вміст по вертикалі.
+  // When the field is stretched beyond min-height (a flex row with a button),
+  // Vuetify leaves the input at the top — center the content vertically.
   .v-field__field {
     align-items: center;
   }
@@ -251,8 +251,8 @@ defineExpose({
     color: rgb(var(--v-theme-brand-primary));
   }
 
-  /* Стан помилки мусить бути ПІСЛЯ базових правил обводки: вони задають колір
-     бордера з токена і без цього перекрили б червоний від Vuetify. */
+  /* The error state must come AFTER the base outline rules: they set the border
+     color from the token and would otherwise override Vuetify's red. */
   .v-field--error .v-field__outline,
   .v-field--error:hover .v-field__outline {
     color: rgb(var(--v-theme-error));

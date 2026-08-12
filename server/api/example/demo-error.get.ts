@@ -1,9 +1,9 @@
-// Демо-ендпоінт: навмисно повертає заданий HTTP-статус (?status=…).
-// Живить сторінку /errors — показ обробки помилок для різних типів запитів.
+// Demo endpoint: deliberately responds with the requested HTTP status (?status=…).
+// Powers the /errors page — showcases error handling for different request types.
 
-// Людські повідомлення для кожного статусу. Ідуть у JSON-тіло (UTF-8), тож кирилиця
-// коректна — на відміну від statusMessage, що потрапляє в ASCII-only reason phrase
-// і був би спотворений. normalizeApiError дістає текст саме з тіла (err.data.message).
+// Human-readable messages per status. They go into the JSON body (UTF-8), so Cyrillic
+// is fine — unlike statusMessage, which ends up in the ASCII-only reason phrase
+// and would be mangled. normalizeApiError reads the text from the body (err.data.message).
 const STATUS_MESSAGES: Record<number, string> = {
   400: 'Некоректний запит',
   401: 'Не авторизовано',
@@ -16,22 +16,22 @@ const STATUS_MESSAGES: Record<number, string> = {
 export default defineEventHandler((event) => {
   const status = Number(getQuery(event).status) || 200
 
-  // Без статусу (або 200) — успішна відповідь.
+  // No status (or 200) — successful response.
   if (status === 200) {
     return { ok: true, message: 'Запит успішний' }
   }
 
-  // 422 → сирий масив [field, rule, params] як УСЕ тіло відповіді: саме цей формат
-  // useForm мапить у помилки полів (error.data.forEach). Тут валиться лише email.
+  // 422 → a raw [field, rule, params] array as the ENTIRE response body: this exact format
+  // is what useForm maps into field errors (error.data.forEach). Only email fails here.
   if (status === 422) {
     setResponseStatus(event, 422)
 
     return [['email', 'email', []]]
   }
 
-  // Решта статусів — через createError: message летить у тіло (err.data.message),
-  // звідки його дістає normalizeApiError. statusMessage не задаємо навмисно —
-  // h3 радить message для довгих текстів (reason phrase лишається стандартним).
+  // All other statuses — via createError: message goes into the body (err.data.message),
+  // where normalizeApiError picks it up. statusMessage is deliberately not set —
+  // h3 recommends message for long texts (the reason phrase stays standard).
   const message = STATUS_MESSAGES[status] ?? `Помилка ${status}`
   throw createError({ statusCode: status, message, data: { message } })
 })

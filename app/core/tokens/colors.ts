@@ -1,20 +1,20 @@
-// Джерело правди для кольору — його читає тема Vuetify (~/core/plugins/vuetify.ts)
-// і Tailwind (./tailwind.config.ts), тож одна правка тут рухає обидва.
+// Source of truth for color — read by the Vuetify theme (~/core/plugins/vuetify.ts)
+// and by Tailwind (./tailwind.config.ts), so one edit here moves both.
 //
-// Токени розбиті на групи:
-//   base    — white/black: абсолютні значення, однакові в будь-якій темі
-//   brand   — brand-*: фіксована айдентика, теж НЕ перемикається в темній
-//   status  — error/info/success/warning: семантика стану (ці імена Vuetify
-//             читає сам — валідація, алерти)
-//   text    — primary/secondary: чорнило поверх поверхонь, перемикається в темній
-//   surface — поверхні й лінії, перемикається в темній
+// Tokens are split into groups:
+//   base    — white/black: absolute values, identical in any theme
+//   brand   — brand-*: fixed identity, also does NOT switch in dark
+//   status  — error/info/success/warning: state semantics (Vuetify reads these
+//             names itself — validation, alerts)
+//   text    — primary/secondary: ink on top of surfaces, switches in dark
+//   surface — surfaces and lines, switches in dark
 //
-// Група «text» навмисно БЕЗ префікса в ключах: утиліта вже несе його сама, тож
-// клас читається як `text-primary`, а не `text-text-primary`. Через це:
-//   • колір ДІЇ (кнопки, лінки, фокус інпутів) — це `brand-primary`, а не `primary`;
-//     kit-компоненти передають color="brand-primary" явно;
-//   • `primary`/`secondary` у темі Vuetify означають ТЕКСТ, а не акцент —
-//     на відміну від дефолтної конвенції Vuetify.
+// The "text" group deliberately has NO prefix in its keys: the utility already
+// carries it, so the class reads as `text-primary`, not `text-text-primary`. Because of this:
+//   • the ACTION color (buttons, links, input focus) is `brand-primary`, not `primary`;
+//     kit components pass color="brand-primary" explicitly;
+//   • `primary`/`secondary` in the Vuetify theme mean TEXT, not accent —
+//     unlike Vuetify's default convention.
 
 // ── Base ────────────────────────────────────────────────────────────────────
 export const BASE_COLORS = {
@@ -23,38 +23,38 @@ export const BASE_COLORS = {
 } as const
 
 // ── Brand ───────────────────────────────────────────────────────────────────
-// Фіксована айдентика: на відміну від токенів нижче вони НЕ перемикаються між
-// темами — brand-secondary лишається темним і в темній темі. Нейтралей тут
-// навмисно немає: canvas/border/muted живуть у групі surface, і другий комплект
-// лише розходився б із темою.
+// Fixed identity: unlike the tokens below, these do NOT switch between
+// themes — brand-secondary stays dark in the dark theme too. There are deliberately
+// no neutrals here: canvas/border/muted live in the surface group, and a second set
+// would only drift out of sync with the theme.
 //
-// Рампа primary задана один раз; `brand-primary` (щабель 600) і
-// `brand-secondary` (щабель 900) — псевдоніми в неї, а не другі копії тих
-// самих hex. Тому окремого `brand-primary-600` немає: це і є `brand-primary`.
+// The primary ramp is defined once; `brand-primary` (step 600) and
+// `brand-secondary` (step 900) are aliases into it, not second copies of the
+// same hex. That's why there is no separate `brand-primary-600`: it IS `brand-primary`.
 const BRAND_PRIMARY_RAMP = {
   50: '#e3f1f7',
   100: '#c2e2ee',
-  200: '#8ecae6', // м'який фон / ілюстрації
+  200: '#8ecae6', // soft background / illustrations
   400: '#4fb3d1',
   600: '#219ebc',
   900: '#023047',
 } as const
 
 export const BRAND_COLORS = {
-  'brand-primary': BRAND_PRIMARY_RAMP[600], // дія: кнопки, лінки, фокус
+  'brand-primary': BRAND_PRIMARY_RAMP[600], // action: buttons, links, focus
   'brand-primary-50': BRAND_PRIMARY_RAMP[50],
   'brand-primary-100': BRAND_PRIMARY_RAMP[100],
   'brand-primary-200': BRAND_PRIMARY_RAMP[200],
   'brand-primary-400': BRAND_PRIMARY_RAMP[400],
   'brand-primary-900': BRAND_PRIMARY_RAMP[900],
-  'brand-secondary': BRAND_PRIMARY_RAMP[900], // ink / темні поверхні
-  'brand-accent': '#ffb703', // увага — з нього походить status warning
-  'brand-accent-600': '#fb8500', // темніший щабель акценту — CTA
+  'brand-secondary': BRAND_PRIMARY_RAMP[900], // ink / dark surfaces
+  'brand-accent': '#ffb703', // attention — status warning derives from it
+  'brand-accent-600': '#fb8500', // darker accent step — CTA
 } as const
 
-// ── Status (семантика) ──────────────────────────────────────────────────────
-// Імена зафіксовані Vuetify: повідомлення валідації, VAlert і подібне беруть
-// саме `error`/`success`/`warning`/`info`, тому перейменувати їх не можна.
+// ── Status (semantics) ──────────────────────────────────────────────────────
+// The names are fixed by Vuetify: validation messages, VAlert and the like take
+// exactly `error`/`success`/`warning`/`info`, so they can't be renamed.
 export const STATUS_COLORS = {
   error: '#dc2626',
   info: '#0ea5e9',
@@ -63,20 +63,20 @@ export const STATUS_COLORS = {
 } as const
 
 // ── Text ────────────────────────────────────────────────────────────────────
-// Класи: text-primary / text-secondary. Працюють і в пропі color компонентів
-// Vuetify (color="secondary"), бо ключ не має власного префікса.
+// Classes: text-primary / text-secondary. They also work in the color prop of
+// Vuetify components (color="secondary"), since the key has no prefix of its own.
 export const TEXT_COLORS = {
-  primary: BRAND_COLORS['brand-secondary'], // заголовки, основний текст
-  secondary: '#55707f', // підписи, hint, вторинний текст
+  primary: BRAND_COLORS['brand-secondary'], // headings, body text
+  secondary: '#55707f', // captions, hints, secondary text
 } as const
 
 // ── Surface ─────────────────────────────────────────────────────────────────
 export const SURFACE_COLORS = {
-  surface: BASE_COLORS.white, // картки, поповери
-  background: '#f4f8fb', // canvas сторінки
-  muted: '#eef4f7', // приглушена заливка
-  border: '#e4eef3', // лінії, розділювачі
-  highlight: BRAND_COLORS['brand-primary-50'], // вибраний/активний рядок
+  surface: BASE_COLORS.white, // cards, popovers
+  background: '#f4f8fb', // page canvas
+  muted: '#eef4f7', // muted fill
+  border: '#e4eef3', // lines, dividers
+  highlight: BRAND_COLORS['brand-primary-50'], // selected/active row
 } as const
 
 export const colors = {
@@ -87,10 +87,10 @@ export const colors = {
   ...SURFACE_COLORS,
 } as const
 
-// Темна тема перекриває лише текст і поверхні — base і brand лишаються собою.
-// Усе, що читається через Tailwind-утиліти, бере значення з --v-theme-* (див.
-// tailwind.config.ts), тож перекриті тут ключі автоматично «перевертаються»
-// і в @apply-класах.
+// The dark theme overrides only text and surfaces — base and brand stay as they are.
+// Everything read through Tailwind utilities takes its value from --v-theme-* (see
+// tailwind.config.ts), so the keys overridden here automatically "flip"
+// in @apply classes too.
 export const darkColors = {
   ...colors,
   primary: '#e8f3f8',

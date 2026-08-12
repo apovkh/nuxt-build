@@ -3,8 +3,8 @@ definePageMeta({
   title: 'SSR + cache — useServerQuery',
   subtitle: 'ssr: true · дані фетчаться на сервері й приходять у початковому HTML. Перевір view-source: заголовки вже там.',
   maxWidth: 'max-w-[1600px]',
-  // Статичний прапорець: layout малює 2-колонковий грід уже на SSR (див. default.vue),
-  // тож немає стрибка 1→2 колонки після гідрації. Пара до usePageCode нижче.
+  // Static flag: the layout draws the 2-column grid already on SSR (see default.vue),
+  // so there is no 1→2 column jump after hydration. Pairs with usePageCode below.
   hasCode: true,
   breadcrumbs: [
     { title: 'Головна', to: '/' },
@@ -12,27 +12,27 @@ definePageMeta({
   ],
 })
 
-// useServerQuery = useQuery + await suspense: запит завершується до рендеру.
-// На сервері (onServerPrefetch) → dehydrate у payload → дані в HTML (SEO); при
-// клієнтській навігації await тримає перехід через <Suspense> → без спалаху Loading.
+// useServerQuery = useQuery + await suspense: the request finishes before render.
+// On the server (onServerPrefetch) → dehydrate into the payload → data in the HTML (SEO);
+// on client-side navigation, await holds the transition via <Suspense> → no Loading flash.
 const news = useNewsRepository()
 
 usePageCode([
   {
     title: 'useServerQuery',
-    code: `// ssr: true — глобально у nuxt.config
+    code: `// ssr: true — globally in nuxt.config
 const news = useNewsRepository()
 
-// await useServerQuery: на сервері onServerPrefetch кладе
-// дані у dehydrate/HTML (SEO), на клієнті await тримає
-// перехід (Suspense) → дані готові до рендеру, без Loading
+// await useServerQuery: on the server onServerPrefetch puts
+// data into dehydrate/HTML (SEO), on the client await holds
+// the transition (Suspense) → data ready for render, no Loading
 const { data: articles, error } = await useServerQuery(
   news.listQuery(),
 )`,
   },
 ])
 
-// await → дані гарантовано готові до рендеру (SSR і клієнтська навігація).
+// await → data is guaranteed ready for render (SSR and client-side navigation).
 const { data: articles, error } = await useServerQuery(news.listQuery())
 </script>
 
@@ -47,11 +47,11 @@ const { data: articles, error } = await useServerQuery(news.listQuery())
         <h2 class="font-medium">
           {{ article.title }}
         </h2>
-        <!-- Фіксований бокс (320×180) + object-cover резервує місце до завантаження →
-             нуль CLS (картинки не стрибають). h-/w- класи потрібні, бо Tailwind
-             preflight ставить img{height:auto} і перебив би атрибут height.
-             bg-muted — нейтральний плейсхолдер, поки піксель не прийшов; loading=eager
-             — почати тягнути одразу (картинки над згином). -->
+        <!-- A fixed box (320×180) + object-cover reserves space before load →
+             zero CLS (images don't jump). The h-/w- classes are needed because Tailwind
+             preflight sets img{height:auto}, which would override the height attribute.
+             bg-muted — a neutral placeholder until the first pixel arrives; loading=eager
+             — start fetching immediately (images are above the fold). -->
         <NuxtImg
           v-if="article.image_url"
           :src="article.image_url"

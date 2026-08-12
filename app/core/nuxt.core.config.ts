@@ -17,23 +17,23 @@ export const coreNuxtConfig: NuxtConfig = {
     '~/core/plugins/vue-query',
     '~/core/plugins/vuetify',
   ],
-  // Стилі Vuetify — ПЕРЕД main.css: vite-plugin-vuetify резолвить лише компоненти,
-  // не їхній CSS. Порядок важливий — Tailwind-утиліти мають перебивати базові
-  // стилі Vuetify, а не навпаки.
+  // Vuetify styles BEFORE main.css: vite-plugin-vuetify resolves only the components,
+  // not their CSS. Order matters — Tailwind utilities must override Vuetify's base
+  // styles, not the other way around.
   css: ['vuetify/styles', '~/core/tokens/main.css'],
   tailwindcss: { configPath: '~/core/tailwind.config' },
 
   // Vuetify ships untranspiled ESM — Nitro must compile it for the SSR bundle.
   build: { transpile: ['vuetify'] },
 
-  // vite-plugin-vuetify резолвить компоненти (VBtn, VDataTable, VDialog…) на льоту,
-  // тож у SFC їх не імпортують — і в бандл потрапляє лише те, що реально вжите.
-  // Nuxt не дає передати плагін через vite.plugins (конфіг серіалізується),
-  // тому чіпляємось до vite:extendConfig.
+  // vite-plugin-vuetify resolves components (VBtn, VDataTable, VDialog…) on the fly,
+  // so SFCs don't import them — and only what's actually used ends up in the bundle.
+  // Nuxt doesn't let us pass the plugin via vite.plugins (the config gets serialized),
+  // so we hook into vite:extendConfig instead.
   modules: [
     (_options, nuxt) => {
       nuxt.hooks.hook('vite:extendConfig', (config) => {
-        // config.plugins типізований readonly, хоча Nuxt саме тут і очікує мутацію.
+        // config.plugins is typed readonly, even though this is exactly where Nuxt expects mutation.
         const mutableConfig = config as { plugins?: unknown[] }
         mutableConfig.plugins ??= []
         mutableConfig.plugins.push(vuetify({ autoImport: true }))

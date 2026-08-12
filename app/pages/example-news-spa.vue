@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
+  hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Client cache — useClientQuery',
   subtitle: 'ssr: false · у view-source даних немає — вони підвантажуються запитом у браузері (вкладка Network).',
   maxWidth: 'max-w-[1600px]',
@@ -10,8 +10,8 @@ definePageMeta({
   ],
 })
 
-// useClientQuery = useQuery без onServerPrefetch (+ enabled на клієнті):
-// запит ЛИШЕ у браузері після гідрації, кеш повноцінний.
+// useClientQuery = useQuery without onServerPrefetch (+ enabled on the client):
+// the request runs ONLY in the browser after hydration, with a full-featured cache.
 const news = useNewsRepository()
 const { data: articles, isPending, error } = useClientQuery(news.listQuery())
 
@@ -21,8 +21,8 @@ usePageCode([
     code: `// routeRules: { '/example-news-spa': { ssr: false } }
 const news = useNewsRepository()
 
-// useQuery без onServerPrefetch (+ enabled на клієнті):
-// запит лише у браузері, повноцінний кеш/ретраї/invalidate
+// useQuery without onServerPrefetch (+ enabled on the client):
+// request only in the browser, full cache/retries/invalidate
 const { data: articles, isPending, error } = useClientQuery(
   news.listQuery(),
 )`,

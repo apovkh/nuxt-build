@@ -3,7 +3,7 @@ import { rules } from '~/core/utils/validation'
 import { login } from '~/repositories/example/auth'
 
 definePageMeta({
-  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
+  hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Enter to site',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [

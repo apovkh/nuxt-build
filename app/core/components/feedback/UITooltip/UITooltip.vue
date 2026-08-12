@@ -3,17 +3,17 @@ import { mdiHelpCircleOutline } from '@mdi/js'
 
 defineProps<{
   /**
-   * Тіло тултипа. Рендериться як HTML (v-html) — сюди можна передавати лише
-   * розмітку, автором якої є розробник або довірений бекенд.
-   * НІКОЛИ не передавай сюди сирий користувацький ввід: він виконається як скрипт.
-   * Потрібен звичайний текст без розмітки — скористайся слотом.
+   * Tooltip body. Rendered as HTML (v-html) — only pass markup
+   * authored by a developer or a trusted backend.
+   * NEVER pass raw user input here: it will execute as a script.
+   * Need plain text without markup — use the slot instead.
    */
   text: string
   ariaLabel?: string
   contentClass?: string
   uniformHtmlFontSize?: boolean
   openOnClick?: boolean
-  /** Дозволяє навести курсор на сам тултип (виділити текст / клікнути посилання) — контент не закривається. */
+  /** Lets the cursor hover over the tooltip itself (select text / click a link) — the content doesn't close. */
   interactive?: boolean
 }>()
 </script>
@@ -56,8 +56,8 @@ defineProps<{
 </style>
 
 <style scoped lang="scss">
-/* Вхідна розмітка часто задає font-size на вкладених тегах; inherit тримає
-   один розмір на весь тултип. */
+/* Incoming markup often sets font-size on nested tags; inherit keeps
+   a single size across the whole tooltip. */
 .ui-tooltip__html--uniform {
   font-size: 1rem;
 }

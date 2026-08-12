@@ -6,8 +6,8 @@ export interface CodeTab {
   code: string
 }
 
-// Реєструє код для правої колонки layout. Ключується по маршруту, тож між сторінками
-// нічого не «залипає»: layout читає код саме поточного шляху.
+// Registers code for the layout's right column. Keyed by route, so nothing "sticks"
+// between pages: the layout reads the code of the current path specifically.
 export function usePageCode(tabs: MaybeRefOrGetter<CodeTab[]>) {
   const route = useRoute()
   const store = useState<Record<string, CodeTab[]>>('page-code', () => ({}))

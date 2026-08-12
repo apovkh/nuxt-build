@@ -20,7 +20,7 @@ export default function useForm<
   fieldRules?: FieldRules<TFormData>,
 ) {
   const form = reactive(formData) as TFormData
-  // Знімок до будь-яких правок — reactive(formData) мутує сам formData.
+  // Snapshot before any edits — reactive(formData) mutates formData itself.
   const initialValues = { ...formData }
   // errors as string[] — compatible with Vuetify :error-messages. For a plain input use errors.x?.[0].
   const errors = ref<FieldErrors<TFormData>>({})
@@ -81,8 +81,8 @@ export default function useForm<
       const status = error instanceof FetchError ? (error.statusCode ?? error.response?.status) : undefined
 
       // 2) server-side validation (422) — same errors map, same messages.
-      // Обидва контракти: сирий масив як тіло (examples) і createError({ data })
-      // з h3, де ofetch кладе тіло під error.data → масив опиняється в error.data.data.
+      // Both contracts: a raw array as the body (examples) and createError({ data })
+      // from h3, where ofetch puts the body under error.data → the array ends up in error.data.data.
       if (error instanceof FetchError && status === 422) {
         const validationErrors = (error.data?.data ?? error.data) as ValidationErrors
         validationErrors?.forEach(([field, rule, params]) => {
@@ -102,8 +102,8 @@ export default function useForm<
   }
 
   function reset() {
-    // З initialValues, а не з formData: form === reactive(formData), тобто те саме
-    // джерело, і Object.assign(form, formData) не скидав би нічого.
+    // From initialValues, not formData: form === reactive(formData), i.e. the same
+    // source, and Object.assign(form, formData) would reset nothing.
     Object.assign(form, initialValues)
     errors.value = {}
     success.value = false

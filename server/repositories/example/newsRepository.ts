@@ -1,7 +1,7 @@
 import type { Article, NewsResponse } from '#shared/types/example/news'
 
-// Серверний data-access ресурсу "news": інкапсулює виклик зовнішнього API newsdata.io
-// та секретний ключ. Лише сервер — у клієнт не потрапляє. Використовується Nitro-роутами.
+// Server-side data access for the "news" resource: encapsulates the call to the external
+// newsdata.io API and the secret key. Server only — never shipped to the client. Used by Nitro routes.
 export const newsRepository = {
   async fetchLatest(apiKey: string): Promise<Article[]> {
     const res = await $fetch<Partial<NewsResponse>>(

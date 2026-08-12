@@ -2,18 +2,18 @@ import type { Bookmark } from '#shared/types/example/bookmarks'
 import { queryOptions } from '@tanstack/vue-query'
 
 /**
- * Репозиторій ресурсу "bookmarks" — читання + мутації.
- * Конвенція методів: `*Query()` → кешовані (queryOptions); дієслова (`create`) → мутації/сирі виклики.
+ * Repository for the "bookmarks" resource — reads + mutations.
+ * Method convention: `*Query()` → cached (queryOptions); verbs (`create`) → mutations/raw calls.
  */
 export function useBookmarksRepository() {
   return {
-    /** Кешований список (queryOptions). SSR → useServerQuery, клієнт → useClientQuery. */
+    /** Cached list (queryOptions). SSR → useServerQuery, client → useClientQuery. */
     listQuery: () =>
       queryOptions({
         queryKey: ['bookmarks'],
         queryFn: () => useApi<Bookmark[]>('/example/bookmarks'),
       }),
-    /** Мутація (POST) → передається у mutationFn useApiMutation. */
+    /** Mutation (POST) → passed as the mutationFn of useApiMutation. */
     create: (body: { title: string }) =>
       useApi<Bookmark>('/example/bookmarks', { method: 'POST', body }),
   }

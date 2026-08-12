@@ -2,7 +2,7 @@
 import type { Article } from '#shared/types/example/news'
 
 definePageMeta({
-  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
+  hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'One-off request — useApi',
   subtitle: 'Запит виконується лише за кліком, результат не кешується (перезавантаж сторінку — дані зникнуть).',
   maxWidth: 'max-w-[1600px]',
@@ -12,8 +12,8 @@ definePageMeta({
   ],
 })
 
-// useApi (під капотом репозиторію) — разовий запит без кешу й SSR-payload.
-// Стан (pending/error/data) керуємо руками — TanStack не задіяний.
+// useApi (under the repository's hood) — a one-off request with no cache or SSR payload.
+// State (pending/error/data) is managed by hand — TanStack is not involved.
 const news = useNewsRepository()
 
 const articles = ref<Article[]>([])
@@ -44,7 +44,7 @@ usePageCode([
 const articles = ref<Article[]>([])
 const pending = ref(false)
 
-// useApi під капотом репозиторію — разовий запит без кешу
+// useApi under the repository's hood — one-off request, no cache
 async function load() {
   pending.value = true
   try {

@@ -2,7 +2,7 @@
 import { rules } from '~/core/utils/validation'
 
 definePageMeta({
-  hasCode: true, // грід 2-колонки вже на SSR (див. default.vue)
+  hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Demo: жива валідація',
   subtitle: 'Помилки зʼявляються/зникають на blur і на submit. Той самий errors згодиться для Vuetify.',
   maxWidth: 'max-w-[1600px]',
@@ -12,7 +12,7 @@ definePageMeta({
   ],
 })
 
-// Мок API без бекенду — просто імітує успішний запит через 600мс.
+// Mock API without a backend — just simulates a successful request after 600ms.
 function fakeRegister(_data: { name: string, email: string, password: string, agree: boolean }) {
   return new Promise<{ id: number }>((resolve) => {
     setTimeout(resolve, 600, { id: 1 })
@@ -23,7 +23,7 @@ const { form, errors, pending, success, send, validateField } = useForm(
   fakeRegister,
   { name: '', email: '', password: '', agree: false },
   () => {
-    // onSuccess — тут був би navigateTo / збереження токена
+    // onSuccess — this is where navigateTo / token storage would go
   },
   {
     name: [rules.required, rules.minLength(2), rules.maxLength(40)],
@@ -62,7 +62,7 @@ const { form, errors, pending, send, validateField } = useForm(
 const vuetifyCode = `<script setup lang="ts">
 import { rules } from '~/core/utils/validation'
 
-// useForm НЕ змінюється — той самий errors живить Vuetify
+// useForm does NOT change — the same errors feeds Vuetify
 const { form, errors, pending, send, validateField } = useForm(
   register,
   { email: '', password: '' },
