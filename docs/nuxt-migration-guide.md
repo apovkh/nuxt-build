@@ -1,47 +1,47 @@
-# Nuxt Migration Guide — AngularJS/React → Nuxt (SSR + кешування)
+# Nuxt Migration Guide — AngularJS/React → Nuxt (SSR + caching)
 
-Інструкція для переписування легасі-системи на Nuxt із поділом на публічний SSR-шар та закриту SPA-адмінку з кешуванням. Призначена для додавання в цільовий репозиторій як довідка для команди.
-
----
-
-## 0. Контекст: типовий вхід
-
-Гайд розрахований на легасі-систему, де:
-
-- фронт — AngularJS 1.x або рання React-SPA (часто кілька застосунків під одним доменом);
-- кешу немає: кожен контролер/компонент фетчить незалежно, а `cache: true` трапляється лише у вендорних бібліотеках;
-- запити розсипані по сотнях файлів (`$http`/`$resource`/`fetch` напряму, без транспортного шару);
-- полінг зроблений таймерами (`$interval`/`setInterval`) у самих компонентах.
-
-**Мета міграції — не паритет, а покращення:** додати кеш-шар для UX і коректний SSR для публічних потоків.
-
-Перед стартом варто скласти дві таблиці — публічні маршрути (§3.1) і закриті (§3.2); саме вони диктують `routeRules`.
+Guide for rewriting a legacy system to Nuxt, split into a public SSR layer and a private SPA admin with caching. Intended to live in the target repository as a team reference.
 
 ---
 
-## 1. Головний принцип: кеш ≠ SEO
+## 0. Context: typical starting point
 
-Це різні осі, їх не можна змішувати:
+The guide assumes a legacy system where:
 
-- **SEO/рендер** дає серверний HTML із контентом і мета-тегами (нативні `useAsyncData`/`useFetch` + `useSeoMeta`).
-- **Кеш** (TanStack Query) керує даними на клієнті *після* гідрації — швидкість і плавність, **не** пошук.
+- the frontend is AngularJS 1.x or an early React SPA (often several apps under one domain);
+- there is no cache: every controller/component fetches independently, and `cache: true` appears only in vendor libraries;
+- requests are scattered across hundreds of files (`$http`/`$resource`/`fetch` used directly, no transport layer);
+- polling is done with timers (`$interval`/`setInterval`) inside the components themselves.
 
-Правило: SEO-контент → server-render через native fetch; UX-інтерактив → TanStack. Ніколи не віддавай SEO-важливий контент лише через клієнтський `useQuery` — у первинному HTML його не буде.
+**The migration goal is not parity but improvement:** add a cache layer for UX and proper SSR for public flows.
+
+Before starting, build two tables — public routes (§3.1) and private ones (§3.2); they dictate the `routeRules`.
 
 ---
 
-## 2. Стратегія рендерингу per-route (`routeRules`)
+## 1. Core principle: cache ≠ SEO
 
-Один Nuxt, різні режими на різних маршрутах.
+These are different axes and must not be mixed:
+
+- **SEO/rendering** delivers server HTML with content and meta tags (native `useAsyncData`/`useFetch` + `useSeoMeta`).
+- **Cache** (TanStack Query) manages data on the client *after* hydration — speed and smoothness, **not** search.
+
+Rule: SEO content → server-render via native fetch; UX interactivity → TanStack. Never serve SEO-critical content only through a client-side `useQuery` — it won't be in the initial HTML.
+
+---
+
+## 2. Per-route rendering strategy (`routeRules`)
+
+One Nuxt, different modes on different routes.
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  ssr: true, // дефолт
+  ssr: true, // default
   routeRules: {
-    '/accessibility/**': { prerender: true },            // SSG, індексується
+    '/accessibility/**': { prerender: true },            // SSG, indexed
     '/login/**':         { ssr: true,  robots: false },  // SSR, noindex
-    '/session/**':       { ssr: true,  robots: false },  // масовий end-user потік, noindex
+    '/session/**':       { ssr: true,  robots: false },  // high-volume end-user flow, noindex
     '/admin/**':         { ssr: false },                 // SPA + TanStack
     '/catalog/**':       { ssr: false },
     '/users/**':         { ssr: false },
@@ -52,37 +52,37 @@ export default defineNuxtConfig({
 
 ---
 
-## 3. Поділ по сторінках
+## 3. Page breakdown
 
-### 3.1 Публічний шар → SSR/SSG + native fetch (без TanStack)
+### 3.1 Public layer → SSR/SSG + native fetch (no TanStack)
 
-Заповни таблицю під свою систему — по рядку на маршрут:
+Fill in the table for your system — one row per route:
 
-| Тип сторінки | Auth | Рендер | Дані | SEO |
+| Page type | Auth | Rendering | Data | SEO |
 |---|---|---|---|---|
-| Статичний контент (правова інформація, лендинги) | ні | **SSG** (`prerender`) | нема | ✅ index + hreflang |
-| Форми входу / відновлення пароля / OTP | ні | **SSR** | `$fetch` на submit | `noindex` |
-| Доступ за токеном чи одноразовим лінком | токен | **SSR** | native `useAsyncData` по токену | `noindex` |
+| Static content (legal information, landing pages) | no | **SSG** (`prerender`) | none | ✅ index + hreflang |
+| Login / password reset / OTP forms | no | **SSR** | `$fetch` on submit | `noindex` |
+| Access via token or one-time link | token | **SSR** | native `useAsyncData` by token | `noindex` |
 
-Масовий end-user потік (те, заради чого систему відкривають найчастіше) тримай на SSR: перший екран має бути швидким і доступним без JS. TanStack тут не потрібен.
+Keep the high-volume end-user flow (what the system is opened for most often) on SSR: the first screen must be fast and accessible without JS. TanStack is not needed here.
 
-### 3.2 Закрита адмінка → SPA (`ssr: false`) + TanStack кеш
+### 3.2 Private admin → SPA (`ssr: false`) + TanStack cache
 
-| Тип маршруту | Підхід до даних |
+| Route type | Data approach |
 |---|---|
-| Табличні списки, що змінюються в реальному часі | `useClientQuery` + полінг (`refetchInterval`) |
-| Конструктори/редактори сутностей | кеш + оптимістичні мутації |
-| Довідники й lookup-дані | довгий `staleTime`, спільні `queryKey` |
-| Адміністрування користувачів і ролей | кеш + `invalidateQueries` після мутацій |
-| Аналітика й звіти | **головний кандидат** — важкі агрегації та фільтри, кеш обов'язковий |
+| Table lists that change in real time | `useClientQuery` + polling (`refetchInterval`) |
+| Entity builders/editors | cache + optimistic mutations |
+| Reference and lookup data | long `staleTime`, shared `queryKey` |
+| User and role administration | cache + `invalidateQueries` after mutations |
+| Analytics and reports | **prime candidate** — heavy aggregations and filters, caching is a must |
 
-SEO тут нульове (за логіном) → `ssr: false`, TanStack на повну.
+SEO is zero here (behind login) → `ssr: false`, TanStack at full capacity.
 
 ---
 
-## 4. Налаштування TanStack Query
+## 4. TanStack Query setup
 
-### 4.1 Плагін (один раз)
+### 4.1 Plugin (once)
 
 ```ts
 // plugins/vue-query.ts
@@ -95,7 +95,7 @@ export default defineNuxtPlugin((nuxt) => {
 
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { staleTime: 60 * 1000 }, // проти double-fetch після гідрації
+      queries: { staleTime: 60 * 1000 }, // prevents double-fetch after hydration
     },
   })
 
@@ -110,10 +110,10 @@ export default defineNuxtPlugin((nuxt) => {
 })
 ```
 
-### 4.2 Composables (пресети під сценарії)
+### 4.2 Composables (presets per scenario)
 
 ```ts
-// composables/useServerQuery.ts — SSR + кеш (для маршрутів з ssr: true)
+// composables/useServerQuery.ts — SSR + cache (for routes with ssr: true)
 import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
 import { onServerPrefetch } from 'vue'
 
@@ -125,7 +125,7 @@ export function useServerQuery<T>(options: UseQueryOptions<T>) {
 ```
 
 ```ts
-// composables/useClientQuery.ts — клієнтський кеш (для SPA-адмінки)
+// composables/useClientQuery.ts — client-side cache (for the SPA admin)
 import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
 
 export function useClientQuery<T>(options: UseQueryOptions<T>) {
@@ -137,7 +137,7 @@ export function useClientQuery<T>(options: UseQueryOptions<T>) {
 ```
 
 ```ts
-// composables/useApiMutation.ts — команди на бекенд + авто-інвалідація
+// composables/useApiMutation.ts — backend commands + auto-invalidation
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/vue-query'
 
 export function useApiMutation<TData, TVars>(
@@ -155,14 +155,14 @@ export function useApiMutation<TData, TVars>(
 ```
 
 ```ts
-// composables/useApi.ts — ПРОСТО запит: дані без кешу (тонка обгортка над $fetch)
-// Без TanStack, без SSR-payload. Для разових викликів. Потрібен кеш → use*Query; SSR → useFetch.
+// composables/useApi.ts — JUST a request: data without cache (thin wrapper over $fetch)
+// No TanStack, no SSR payload. For one-off calls. Need cache → use*Query; SSR → useFetch.
 export function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]) {
   return $fetch<T>(url, opts)
 }
 ```
 
-### 4.3 Query-функції
+### 4.3 Query functions
 
 ```ts
 // composables/queries.ts
@@ -171,21 +171,21 @@ import { queryOptions } from '@tanstack/vue-query'
 export const ordersQuery = () => queryOptions({
   queryKey: ['orders'],
   queryFn: () => $fetch('/api/orders'),
-  refetchInterval: 15_000, // замість таймера-полінга в самій таблиці
+  refetchInterval: 15_000, // instead of a polling timer inside the table itself
 })
 
 export const statusesQuery = () => queryOptions({
   queryKey: ['catalog', 'statuses'],
   queryFn: () => $fetch('/api/catalog/statuses'),
-  staleTime: Infinity, // lookup-дані: одна вибірка на сесію (було по запиту в кожній модалці)
+  staleTime: Infinity, // lookup data: one fetch per session (used to be a request in every modal)
 })
 ```
 
-### 4.4 Використання
+### 4.4 Usage
 
 ```vue
 <script setup lang="ts">
-// адмінка (SPA)
+// admin (SPA)
 const { data: orders } = useClientQuery(ordersQuery())
 
 const { mutate: changeStatus } = useApiMutation({
@@ -195,17 +195,17 @@ const { mutate: changeStatus } = useApiMutation({
 </script>
 ```
 
-**Правило вибору composable:** SSR-сторінка з кешем → `useServerQuery`; SPA-адмінка → `useClientQuery`; зміна даних → `useApiMutation`; разовий запит без кешу (просто запит) → `useApi` (або native `useFetch` якщо потрібен SSR без кешу).
+**Composable selection rule:** SSR page with cache → `useServerQuery`; SPA admin → `useClientQuery`; data changes → `useApiMutation`; one-off request without cache (just a request) → `useApi` (or native `useFetch` if SSR without cache is needed).
 
 ---
 
-## 5. SEO (тільки публічний шар)
+## 5. SEO (public layer only)
 
 ```vue
 <script setup lang="ts">
-// напр. accessibility-statement
+// e.g. accessibility-statement
 useSeoMeta({
-  title: 'Заява про доступність',
+  title: 'Accessibility Statement',
   description: '...',
   ogTitle: '...',
   ogDescription: '...',
@@ -213,34 +213,34 @@ useSeoMeta({
 </script>
 ```
 
-- Модулі: `@nuxtjs/sitemap`, `@nuxtjs/robots`.
-- Мультимовність: `@nuxtjs/i18n` з `hreflang` і локалізованими URL.
-- `robots: false` у `routeRules` для маршрутів, які публічно доступні, але не для індексації (логін, доступ за токеном).
+- Modules: `@nuxtjs/sitemap`, `@nuxtjs/robots`.
+- Multilingual: `@nuxtjs/i18n` with `hreflang` and localized URLs.
+- `robots: false` in `routeRules` for routes that are publicly accessible but not meant for indexing (login, token-based access).
 
 ---
 
-## 6. GEO (Generative Engine Optimization) — відкладено
+## 6. GEO (Generative Engine Optimization) — deferred
 
-Якщо публічного контентного шару (лендинг, блог, публічні звіти) ще немає, GEO **немає на чому застосовувати**: коли індексуються лише статичні сторінки, їм досить SSG + коректних мета.
+If there is no public content layer yet (landing page, blog, public reports), GEO **has nothing to apply to**: when only static pages are indexed, SSG + correct meta is enough for them.
 
-Повернутися до GEO, коли з'явиться публічний контент. Тоді, поверх того ж SSR: structured data (schema.org / JSON-LD), семантично чистий server-rendered HTML (AI-краулери погано виконують JS), за потреби `llms.txt`. Окремої «GEO-архітектури» не існує — це якісний SEO + структуровані дані.
-
----
-
-## 7. Порядок міграції (рекомендований)
-
-1. Каркас Nuxt + `routeRules` + плагін `vue-query.ts` + 4 composables.
-2. Публічний шар (найпростіший, найбільша цінність для end-user): статичні сторінки → login-flow → основний end-user потік на SSR.
-3. Адмінка модулями, від простого до складного: спершу довідники й керування користувачами, далі списки, наостанок конструктори/редактори.
-4. Аналітика — портувати як SPA-розділ з TanStack (тут кеш дає найбільше).
-5. Замінити всі таймерні полінги на `refetchInterval`; усі прямі POST-виклики → `useApiMutation` з `invalidate`.
+Return to GEO once public content appears. Then, on top of the same SSR: structured data (schema.org / JSON-LD), semantically clean server-rendered HTML (AI crawlers execute JS poorly), and `llms.txt` if needed. There is no separate "GEO architecture" — it is quality SEO + structured data.
 
 ---
 
-## Резюме
+## 7. Migration order (recommended)
 
-- **Кеш і SEO — різні задачі.** Не розв'язуй SEO кешем.
-- **Публічні потоки** (статичні сторінки, логін, основний end-user флоу) → SSR/SSG + native fetch + мета.
-- **Закрита адмінка й аналітика** → SPA (`ssr: false`) + TanStack кеш.
-- **GEO** відкласти до появи публічного контенту.
-- Один Nuxt, два режими через `routeRules`.
+1. Nuxt skeleton + `routeRules` + the `vue-query.ts` plugin + the 4 composables.
+2. Public layer (the simplest, biggest end-user value): static pages → login flow → the main end-user flow on SSR.
+3. Admin module by module, from simple to complex: reference data and user management first, then lists, builders/editors last.
+4. Analytics — port as a SPA section with TanStack (caching pays off most here).
+5. Replace all timer-based polling with `refetchInterval`; all direct POST calls → `useApiMutation` with `invalidate`.
+
+---
+
+## Summary
+
+- **Cache and SEO are different problems.** Don't solve SEO with a cache.
+- **Public flows** (static pages, login, the main end-user flow) → SSR/SSG + native fetch + meta.
+- **Private admin and analytics** → SPA (`ssr: false`) + TanStack cache.
+- **Defer GEO** until public content appears.
+- One Nuxt, two modes via `routeRules`.

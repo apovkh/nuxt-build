@@ -1,10 +1,10 @@
-# Nuxt Base Build — конфігурація та конвенції
+# Nuxt Base Build — configuration and conventions
 
-Переиспользувана база для нових проектів на Nuxt. Описує налаштування для data-fetching composables **та ширше** — HTTP-клієнт, env, SEO, i18n, структуру, інструменти. Project-agnostic: копіюєш у новий проект і донастроюєш під нього.
+A reusable base for new Nuxt projects. Covers the setup for data-fetching composables **and beyond** — HTTP client, env, SEO, i18n, structure, tooling. Project-agnostic: copy it into a new project and fine-tune it there.
 
 ---
 
-## 0. Структура проекту
+## 0. Project structure
 
 ```
 project/
@@ -12,63 +12,63 @@ project/
 ├─ .env / .env.example
 ├─ app/
 │  ├─ composables/
-│  │  ├─ useServerQuery.ts     # SSR + кеш
-│  │  ├─ useClientQuery.ts     # клієнтський кеш
-│  │  ├─ useApiMutation.ts     # мутації + інвалідація
-│  │  └─ useApi.ts             # ПРОСТО запит: разовий виклик без кешу (не TanStack)
-│  ├─ repositories/            # клієнтський data-access: use<Domain>Repository()
+│  │  ├─ useServerQuery.ts     # SSR + cache
+│  │  ├─ useClientQuery.ts     # client-side cache
+│  │  ├─ useApiMutation.ts     # mutations + invalidation
+│  │  └─ useApi.ts             # JUST a request: one-off call, no cache (not TanStack)
+│  ├─ repositories/            # client-side data access: use<Domain>Repository()
 │  │  ├─ useNewsRepository.ts       #   listQuery() → queryOptions (read) + getAll() (raw)
-│  │  └─ useBookmarksRepository.ts  #   listQuery() + create() (мутація)
+│  │  └─ useBookmarksRepository.ts  #   listQuery() + create() (mutation)
 │  ├─ plugins/
 │  │  ├─ vue-query.ts          # TanStack init + hydration
-│  │  └─ api.ts                # $fetch-інстанс з інтерсепторами
+│  │  └─ api.ts                # $fetch instance with interceptors
 │  ├─ utils/
-│  │  └─ config.ts             # єдина точка дефолтів (див. §1)
+│  │  └─ config.ts             # single source of defaults (see §1)
 │  └─ types/
 └─ server/
-   ├─ api/                     # тонкі Nitro-роути: читають config, делегують
+   ├─ api/                     # thin Nitro routes: read config, delegate
    │  └─ news.get.ts
-   └─ repositories/            # серверний data-access: зовнішні API/БД/секрети
-      └─ newsRepository.ts     #   (реєструється в nitro.imports.dirs)
+   └─ repositories/            # server-side data access: external APIs/DB/secrets
+      └─ newsRepository.ts     #   (registered in nitro.imports.dirs)
 ```
 
 ---
 
-## 1. Єдина точка налаштувань
+## 1. Single point of configuration
 
-Щоб база легко тюнилась під кожен проект — усі дефолти в одному місці.
+So the base is easy to tune per project, all defaults live in one place.
 
 ```ts
 // app/utils/config.ts
 export const API_CONFIG = {
   // HTTP
-  baseURL: '',                 // задається через runtimeConfig, див. §3
+  baseURL: '',                 // set via runtimeConfig, see §3
   timeout: 30_000,
   retry: 1,
   retryDelay: 500,
 
   // TanStack Query defaults
   query: {
-    staleTime: 60_000,         // проти double-fetch після SSR-гідрації
+    staleTime: 60_000,         // prevents double-fetch after SSR hydration
     gcTime: 5 * 60_000,
     retry: 1,
     refetchOnWindowFocus: false,
   },
 
-  // Полінг за замовчуванням для «живих» списків
+  // Default polling for "live" lists
   pollingInterval: 15_000,
 } as const
 
 export type ApiConfig = typeof API_CONFIG
 ```
 
-Далі всюди імпортуємо `API_CONFIG`, а не хардкодимо числа.
+From here on, import `API_CONFIG` everywhere instead of hardcoding numbers.
 
 ---
 
-## 2. HTTP-клієнт (`$fetch`-інстанс з інтерсепторами)
+## 2. HTTP client (`$fetch` instance with interceptors)
 
-Базовий клієнт: baseURL, auth-хедери, єдина обробка помилок, refresh/redirect на 401. Використовується і в composables, і напряму.
+Base client: baseURL, auth headers, unified error handling, refresh/redirect on 401. Used both in composables and directly.
 
 ```ts
 // app/plugins/api.ts
@@ -92,26 +92,26 @@ export default defineNuxtPlugin(() => {
         clear?.()
         if (import.meta.client) navigateTo('/login')
       }
-      // сюди ж — централізований лог/тост помилок
+      // centralized error logging/toasts go here as well
     },
   })
 
-  return { provide: { api } } // доступно як useNuxtApp().$api
+  return { provide: { api } } // available as useNuxtApp().$api
 })
 ```
 
-У `queryFn`/мутаціях використовуй `useNuxtApp().$api` замість голого `$fetch`, щоб інтерсептори працювали.
+In `queryFn`/mutations, use `useNuxtApp().$api` instead of bare `$fetch` so the interceptors apply.
 
 ---
 
-## 3. Env та runtimeConfig
+## 3. Env and runtimeConfig
 
 ```ts
-// nuxt.config.ts (фрагмент)
+// nuxt.config.ts (excerpt)
 runtimeConfig: {
-  // приватне (тільки сервер)
+  // private (server only)
   apiSecret: process.env.NUXT_API_SECRET,
-  // публічне (клієнт + сервер)
+  // public (client + server)
   public: {
     apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
     appEnv:  process.env.NUXT_PUBLIC_APP_ENV || 'development',
@@ -126,11 +126,11 @@ NUXT_PUBLIC_APP_ENV=development
 NUXT_API_SECRET=
 ```
 
-Правило: жодних URL/секретів у коді — тільки через `runtimeConfig`.
+Rule: no URLs/secrets in code — only via `runtimeConfig`.
 
 ---
 
-## 4. TanStack Query — плагін і дефолти
+## 4. TanStack Query — plugin and defaults
 
 ```ts
 // app/plugins/vue-query.ts
@@ -156,10 +156,10 @@ export default defineNuxtPlugin((nuxt) => {
 
 ---
 
-## 5. Composables — пресети запитів
+## 5. Composables — request presets
 
 ```ts
-// app/composables/useServerQuery.ts — SSR + кеш
+// app/composables/useServerQuery.ts — SSR + cache
 import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
 import { onServerPrefetch } from 'vue'
 export function useServerQuery<T>(options: UseQueryOptions<T>) {
@@ -170,7 +170,7 @@ export function useServerQuery<T>(options: UseQueryOptions<T>) {
 ```
 
 ```ts
-// app/composables/useClientQuery.ts — клієнтський кеш
+// app/composables/useClientQuery.ts — client-side cache
 import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
 export function useClientQuery<T>(options: UseQueryOptions<T>) {
   return useQuery({ ...options, enabled: import.meta.client && (options.enabled ?? true) })
@@ -178,7 +178,7 @@ export function useClientQuery<T>(options: UseQueryOptions<T>) {
 ```
 
 ```ts
-// app/composables/useApiMutation.ts — мутації + інвалідація
+// app/composables/useApiMutation.ts — mutations + invalidation
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/vue-query'
 export function useApiMutation<TData, TVars>(
   options: UseMutationOptions<TData, Error, TVars> & { invalidate?: unknown[][] },
@@ -196,9 +196,9 @@ export function useApiMutation<TData, TVars>(
 
 ```ts
 // app/composables/useApi.ts
-// ⚠️ ПРОСТО ЗАПИТ. Без кешу, без TanStack, без SSR-payload.
-// Пряма обгортка над $fetch/$api для разових викликів (експорт, перевірка, службовий виклик).
-// Повертає Promise<T>. Якщо потрібен кеш — бери use*Query; якщо SSR — useFetch.
+// ⚠️ JUST A REQUEST. No cache, no TanStack, no SSR payload.
+// Direct wrapper over $fetch/$api for one-off calls (export, check, utility call).
+// Returns Promise<T>. If you need caching — use use*Query; if SSR — useFetch.
 export function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]) {
   const { $api } = useNuxtApp()
   return $api<T>(url, opts)
@@ -206,59 +206,59 @@ export function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]) {
 ```
 
 ```ts
-// app/repositories/useItemsRepository.ts — data-access ресурсу (read + write)
-// Теку app/repositories треба додати в imports.dirs (auto-import), напр.:
-//   imports: { dirs: ['repositories'] }   // шлях відносно srcDir (app/)
-// Конвенція методів: `*Query()` → кешовані (queryOptions, TanStack);
-// прості дієслова (getAll/create) → сирі/разові виклики та мутації.
+// app/repositories/useItemsRepository.ts — resource data access (read + write)
+// The app/repositories directory must be added to imports.dirs (auto-import), e.g.:
+//   imports: { dirs: ['repositories'] }   // path relative to srcDir (app/)
+// Method convention: `*Query()` → cached (queryOptions, TanStack);
+// plain verbs (getAll/create) → raw/one-off calls and mutations.
 import { queryOptions } from '@tanstack/vue-query'
 export function useItemsRepository() {
   const getAll = () => useApi('/items')
   return {
-    getAll,                                    // разовий read (useApi), без кешу
-    listQuery: () => queryOptions({            // кешований read для use*Query (SSR або клієнт)
+    getAll,                                    // one-off read (useApi), no cache
+    listQuery: () => queryOptions({            // cached read for use*Query (SSR or client)
       queryKey: ['items'],
       queryFn: getAll,
       refetchInterval: API_CONFIG.pollingInterval,
     }),
-    create: (body) => useApi('/items', { method: 'POST', body }), // мутація (useApiMutation)
+    create: (body) => useApi('/items', { method: 'POST', body }), // mutation (useApiMutation)
   }
 }
 ```
 
-**Матриця вибору:**
+**Selection matrix:**
 
-| Потреба | Composable | Кеш | SSR |
+| Need | Composable | Cache | SSR |
 |---|---|---|---|
-| SSR-сторінка з кешем | `useServerQuery` | ✅ | ✅ |
-| SPA-адмінка з кешем | `useClientQuery` | ✅ | ❌ |
-| Зміна даних на бекенді | `useApiMutation` | — | ❌ |
-| Разові дані без кешу (просто запит) | `useApi` / native `useFetch` | ❌ | опц. |
+| SSR page with cache | `useServerQuery` | ✅ | ✅ |
+| SPA admin panel with cache | `useClientQuery` | ✅ | ❌ |
+| Changing data on the backend | `useApiMutation` | — | ❌ |
+| One-off data without cache (just a request) | `useApi` / native `useFetch` | ❌ | opt. |
 
 ---
 
-## 6. Рендеринг per-route (`routeRules`)
+## 6. Per-route rendering (`routeRules`)
 
-Базовий шаблон — під кожен проект коригуєш маршрути.
+Base template — adjust the routes per project.
 
 ```ts
-// nuxt.config.ts (фрагмент)
+// nuxt.config.ts (excerpt)
 routeRules: {
-  '/':          { prerender: true },   // статичний лендинг (SSG)
-  '/blog/**':   { swr: 3600 },         // ISR/SWR-кеш на 1 год
-  '/app/**':    { ssr: false },        // приватна SPA-адмінка + TanStack
+  '/':          { prerender: true },   // static landing page (SSG)
+  '/blog/**':   { swr: 3600 },         // ISR/SWR cache for 1 hour
+  '/app/**':    { ssr: false },        // private SPA admin panel + TanStack
   '/api/**':    { cors: true },
 },
 ```
 
-Орієнтир: публічний контент → `prerender`/`swr` + native fetch + SEO; приватна адмінка → `ssr: false` + TanStack.
+Rule of thumb: public content → `prerender`/`swr` + native fetch + SEO; private admin panel → `ssr: false` + TanStack.
 
 ---
 
-## 7. SEO-дефолти
+## 7. SEO defaults
 
 ```ts
-// nuxt.config.ts (фрагмент)
+// nuxt.config.ts (excerpt)
 app: {
   head: {
     htmlAttrs: { lang: 'uk' },
@@ -271,22 +271,22 @@ app: {
 modules: ['@nuxtjs/sitemap', '@nuxtjs/robots'],
 ```
 
-На публічних сторінках — `useSeoMeta({ title, description, ogTitle, ogDescription })`. Для приватних — `robots: false` у `routeRules`.
+On public pages — `useSeoMeta({ title, description, ogTitle, ogDescription })`. For private ones — `robots: false` in `routeRules`.
 
 ---
 
-## 8. i18n (за потреби мультимовності)
+## 8. i18n (if multilingual support is needed)
 
 ```ts
 modules: ['@nuxtjs/i18n'],
 i18n: {
-  strategy: 'prefix_except_default',   // /en/..., дефолтна без префікса
+  strategy: 'prefix_except_default',   // /en/..., default locale without prefix
   defaultLocale: 'uk',
   locales: [
     { code: 'uk', language: 'uk-UA', file: 'uk.json' },
     { code: 'en', language: 'en-US', file: 'en.json' },
   ],
-  // hreflang генерується автоматично
+  // hreflang is generated automatically
 },
 ```
 
@@ -295,25 +295,25 @@ i18n: {
 ## 9. Nitro / build
 
 ```ts
-// nuxt.config.ts (фрагмент)
+// nuxt.config.ts (excerpt)
 nitro: {
   compressPublicAssets: true,
-  routeRules: {},          // серверні правила кешу за потреби
+  routeRules: {},          // server-side cache rules if needed
 },
 experimental: {
-  payloadExtraction: true, // менші payload при prerender
+  payloadExtraction: true, // smaller payloads when prerendering
 },
 ```
 
 ---
 
-## 10. Інструменти якості (баз. набір)
+## 10. Quality tooling (base set)
 
 - **TypeScript** strict (`tsconfig` extends `./.nuxt/tsconfig.json`).
 - **ESLint** — `@nuxt/eslint`.
-- **Prettier** — форматування.
+- **Prettier** — formatting.
 - **Husky + lint-staged** — pre-commit lint/format.
-- **Vitest** + `@nuxt/test-utils` — юніт/компонентні тести.
+- **Vitest** + `@nuxt/test-utils` — unit/component tests.
 
 ```jsonc
 // package.json (scripts)
@@ -331,17 +331,17 @@ experimental: {
 
 ---
 
-## 11. Чекліст піднімання нового проекту з цієї бази
+## 11. Checklist for spinning up a new project from this base
 
-1. Скопіювати `app/plugins/*`, `app/composables/*`, `app/utils/config.ts`.
-2. Заповнити `.env` (`NUXT_PUBLIC_API_BASE` тощо).
-3. Підкоригувати `API_CONFIG` під проект (staleTime, polling, timeout).
-4. Прописати `routeRules` під реальні публічні/приватні маршрути.
-5. Підключити потрібні модулі (sitemap/robots/i18n) — зайві прибрати.
-6. Додати доменні репозиторії `app/repositories/use<Domain>Repository.ts` (read через `queryOptions` + мутації) і зареєструвати теку в `imports.dirs`.
+1. Copy `app/plugins/*`, `app/composables/*`, `app/utils/config.ts`.
+2. Fill in `.env` (`NUXT_PUBLIC_API_BASE`, etc.).
+3. Adjust `API_CONFIG` for the project (staleTime, polling, timeout).
+4. Define `routeRules` for the actual public/private routes.
+5. Enable the modules you need (sitemap/robots/i18n) — remove the unused ones.
+6. Add domain repositories `app/repositories/use<Domain>Repository.ts` (reads via `queryOptions` + mutations) and register the directory in `imports.dirs`.
 
 ---
 
-## Резюме
+## Summary
 
-База дає: єдину точку налаштувань (`API_CONFIG`), HTTP-клієнт з інтерсепторами (`$api`), 4 пресети composables, змішаний рендеринг через `routeRules`, SEO/i18n-дефолти та інструменти якості. Під новий проект міняються переважно `.env`, `API_CONFIG` і `routeRules` — решта переиспользується як є.
+The base provides: a single point of configuration (`API_CONFIG`), an HTTP client with interceptors (`$api`), 4 composable presets, mixed rendering via `routeRules`, SEO/i18n defaults, and quality tooling. For a new project you mostly change `.env`, `API_CONFIG`, and `routeRules` — the rest is reused as is.

@@ -1,174 +1,174 @@
-# SSR vs Client — що, коли і чим користуватись
+# SSR vs Client — what, when, and which tool to use
 
-Гайд для того, хто читає це вперше. Пояснює, як у Nuxt працює рендер на сервері
-(SSR) і на клієнті (CSR), коли який обирати, і **якими саме composable'ами/компонентами
-цього проєкту** це робити. Прив'язано до реальних файлів у `app/`.
-
----
-
-## 0. Три поняття за 30 секунд
-
-- **SSR (Server-Side Rendering)** — Nuxt виконує твій Vue-компонент **на сервері**,
-  віддає готовий HTML (з даними всередині), і браузер одразу показує сторінку.
-- **CSR (Client-Side Rendering)** — сервер віддає майже порожній HTML, а вміст
-  малює JavaScript **у браузері**. Користувач спершу бачить пусто/лоадер.
-- **Hydration (гідрація)** — після SSR браузер завантажує JS і «оживляє» вже наявний
-  HTML: Vue чіпляється до готової розмітки, відновлює стан із payload і робить
-  сторінку інтерактивною. Даних повторно **не** тягне (якщо все налаштовано правильно).
-
-```
-SSR-запит:
-  браузер → сервер виконує компонент → HTML з даними + payload (__NUXT_DATA__)
-          → браузер миттєво показує HTML → вантажиться JS → hydration → інтерактив
-```
-
-У цьому проєкті `ssr: true` увімкнено **глобально** (`nuxt.config.ts`), а окремі
-сторінки вимикають SSR через `routeRules` (напр. `'/news-spa': { ssr: false }`).
+A guide for a first-time reader. Explains how Nuxt renders on the server
+(SSR) and on the client (CSR), when to pick which, and **exactly which composables/components
+of this project** to use for it. Tied to real files in `app/`.
 
 ---
 
-## 1. Головне питання: SSR чи Client?
+## 0. Three concepts in 30 seconds
 
-| Обирай **SSR (`ssr: true`)**, коли… | Обирай **Client (`ssr: false`)**, коли… |
+- **SSR (Server-Side Rendering)** — Nuxt runs your Vue component **on the server**,
+  returns ready-made HTML (with data inside), and the browser shows the page immediately.
+- **CSR (Client-Side Rendering)** — the server returns nearly empty HTML, and the content
+  is drawn by JavaScript **in the browser**. The user first sees a blank screen/loader.
+- **Hydration** — after SSR the browser loads the JS and "brings to life" the existing
+  HTML: Vue attaches to the ready markup, restores state from the payload, and makes the
+  page interactive. It does **not** re-fetch the data (if everything is set up correctly).
+
+```
+SSR request:
+  browser → server runs the component → HTML with data + payload (__NUXT_DATA__)
+          → browser shows HTML instantly → JS loads → hydration → interactivity
+```
+
+In this project `ssr: true` is enabled **globally** (`nuxt.config.ts`), and individual
+pages disable SSR via `routeRules` (e.g. `'/news-spa': { ssr: false }`).
+
+---
+
+## 1. The main question: SSR or Client?
+
+| Pick **SSR (`ssr: true`)** when… | Pick **Client (`ssr: false`)** when… |
 |---|---|
-| Сторінка **публічна** і має індексуватись (SEO) | Сторінка **за логіном** (кабінет, адмінка) — SEO не треба |
-| Потрібне гарне прев'ю в соцмережах (OG-теги) | Важкий інтерактив/дашборд, де перший екран однаково за спінером |
-| Важливий швидкий перший показ контенту | Багато браузерних API (canvas, localStorage, WebSocket) |
-| Дані однакові для всіх / кешуються | Дані суто персональні й змінюються щомиті |
+| The page is **public** and must be indexed (SEO) | The page is **behind a login** (dashboard, admin) — no SEO needed |
+| You need nice social-media previews (OG tags) | Heavy interactivity/dashboard where the first screen is behind a spinner anyway |
+| Fast first paint of content matters | Lots of browser APIs (canvas, localStorage, WebSocket) |
+| Data is the same for everyone / cacheable | Data is strictly personal and changes constantly |
 
-Правило великого пальця: **за замовчуванням SSR**. Вимикай його точково там, де
-контент приватний або не має сенсу на сервері.
+Rule of thumb: **SSR by default**. Disable it selectively where the content is private
+or makes no sense on the server.
 
 ---
 
-## 2. Чим тягнути дані — 5 інструментів проєкту
+## 2. How to fetch data — the project's 5 tools
 
-Усі демо зібрані на головній (`app/pages/index.vue`). Ось коли що:
+All demos are collected on the home page (`app/pages/index.vue`). Here's when to use what:
 
-### 2.1 `useFetch` / `useAsyncData` — вбудований Nuxt (дефолт для SSR)
-- **Що:** SSR-фетч + автоматичний перенос у payload + гідрація. Нуль церемоній.
-- **Коли:** проста SSR-сторінка, де **не** потрібен кеш/інвалідація TanStack.
-- **Приклад:** `app/pages/index.vue`
+### 2.1 `useFetch` / `useAsyncData` — built into Nuxt (the SSR default)
+- **What:** SSR fetch + automatic transfer into the payload + hydration. Zero ceremony.
+- **When:** a simple SSR page where TanStack caching/invalidation is **not** needed.
+- **Example:** `app/pages/index.vue`
   ```ts
   const { data: articles } = await useFetch<Article[]>('/api/news')
   ```
-- 👉 Якщо сумніваєшся і тобі просто треба дані в HTML — бери це.
+- 👉 If in doubt and you just need data in the HTML — use this.
 
-### 2.2 `useServerQuery` — SSR + кеш TanStack (`app/core/composables/useServerQuery.ts`)
-- **Що:** те саме, що useFetch, але поверх TanStack Query — з кешем, staleTime,
-  інвалідацією. Дані рахуються на сервері (`onServerPrefetch`), летять у HTML і в
-  payload; на клієнті `await suspense()` тримає перехід, щоб не блимав лоадер.
-- **Коли:** публічна сторінка (SEO), де ще й хочеш кеш/інвалідацію між сторінками.
-- **Приклад:** `app/pages/news-ssr.vue`
+### 2.2 `useServerQuery` — SSR + TanStack cache (`app/core/composables/useServerQuery.ts`)
+- **What:** same as useFetch, but on top of TanStack Query — with cache, staleTime,
+  invalidation. Data is computed on the server (`onServerPrefetch`), goes into the HTML and
+  the payload; on the client `await suspense()` holds the transition so no loader flashes.
+- **When:** a public page (SEO) where you also want caching/invalidation across pages.
+- **Example:** `app/pages/news-ssr.vue`
   ```ts
   const { data: articles, error } = await useServerQuery(news.listQuery())
   ```
 
-### 2.3 `useClientQuery` — клієнтський кеш (`app/core/composables/useClientQuery.ts`)
-- **Що:** TanStack-запит **лише в браузері** (`enabled: import.meta.client`), без
-  серверного префетчу. Даних у HTML немає — вони підвантажуються після гідрації.
-- **Коли:** сторінки з `ssr: false` (кабінет/адмінка), де SEO не потрібне, а кеш —
-  так.
-- **Приклад:** `app/pages/news-spa.vue` (+ `routeRules: { '/news-spa': { ssr: false } }`)
+### 2.3 `useClientQuery` — client-side cache (`app/core/composables/useClientQuery.ts`)
+- **What:** a TanStack query **browser-only** (`enabled: import.meta.client`), no
+  server prefetch. No data in the HTML — it loads after hydration.
+- **When:** pages with `ssr: false` (dashboard/admin) where SEO isn't needed but caching
+  is.
+- **Example:** `app/pages/news-spa.vue` (+ `routeRules: { '/news-spa': { ssr: false } }`)
   ```ts
   const { data: articles, isPending, error } = useClientQuery(news.listQuery())
   ```
 
-### 2.4 `useApi` — разовий запит (`app/core/composables/useApi.ts`)
-- **Що:** тонка обгортка над `$fetch`. **Без кешу, без SSR-payload.** Стан
-  (pending/error) керуєш руками.
-- **Коли:** дія на вимогу — клік «Оновити», разове завантаження, яке не треба кешувати.
-- **Приклад:** `app/pages/news-oneoff.vue`
+### 2.4 `useApi` — one-off request (`app/core/composables/useApi.ts`)
+- **What:** a thin wrapper over `$fetch`. **No cache, no SSR payload.** You manage
+  state (pending/error) by hand.
+- **When:** an on-demand action — a "Refresh" click, a one-off load that shouldn't be cached.
+- **Example:** `app/pages/news-oneoff.vue`
 
-### 2.5 `useApiMutation` — зміни даних (`app/core/composables/useApiMutation.ts`)
-- **Що:** мутації (POST/PUT/DELETE) + автоматична інвалідація пов'язаних запитів.
-- **Коли:** створити/оновити/видалити, після чого перечитати список.
-- **Приклад:** `app/pages/bookmarks.vue`
+### 2.5 `useApiMutation` — data changes (`app/core/composables/useApiMutation.ts`)
+- **What:** mutations (POST/PUT/DELETE) + automatic invalidation of related queries.
+- **When:** create/update/delete followed by re-reading the list.
+- **Example:** `app/pages/bookmarks.vue`
 
-**Шпаргалка вибору:**
+**Decision cheat sheet:**
 ```
-Треба дані в HTML (SEO)? ──ні──> useClientQuery (ssr:false) або useApi (разово)
-        │так
+Need data in the HTML (SEO)? ──no──> useClientQuery (ssr:false) or useApi (one-off)
+        │yes
         ▼
-Потрібен кеш/інвалідація TanStack? ──ні──> useFetch / useAsyncData
-        │так
+Need TanStack cache/invalidation? ──no──> useFetch / useAsyncData
+        │yes
         ▼
    useServerQuery
 
-Змінюєш дані (не читаєш)? ──> useApiMutation
+Changing data (not reading)? ──> useApiMutation
 ```
 
 ---
 
-## 3. Про `<Suspense>`, `onServerPrefetch` та `await` (як воно працює)
+## 3. About `<Suspense>`, `onServerPrefetch`, and `await` (how it works)
 
-- **`<Suspense>` вручну писати НЕ треба.** Nuxt уже огортає сторінку: `app/app.vue` —
-  це `<NuxtLayout><NuxtPage/></NuxtLayout>`, а `<NuxtPage>` всередині створює
-  Suspense-межу. Тому **top-level `await` у `<script setup>`** (наш
-  `await useServerQuery(...)`, `await useFetch(...)`) блокує рендер сторінки, доки
-  дані не готові — і на сервері, і при переході всередині застосунку.
-- **`onServerPrefetch`** (хук Vue) — щоб async-робота завершилась **на сервері** й
-  потрапила в payload. Використовується всередині `useServerQuery`.
-- **Ручний `<Suspense>`** доречний лише для **вкладеної** async-межі: коли async-
-  дочірній компонент має показувати власний fallback, не блокуючи всю сторінку.
+- **You do NOT need to write `<Suspense>` by hand.** Nuxt already wraps the page: `app/app.vue`
+  is `<NuxtLayout><NuxtPage/></NuxtLayout>`, and `<NuxtPage>` creates a
+  Suspense boundary inside. So a **top-level `await` in `<script setup>`** (our
+  `await useServerQuery(...)`, `await useFetch(...)`) blocks the page render until
+  the data is ready — both on the server and on in-app navigation.
+- **`onServerPrefetch`** (a Vue hook) — so async work finishes **on the server** and
+  lands in the payload. Used inside `useServerQuery`.
+- **A manual `<Suspense>`** only makes sense for a **nested** async boundary: when an async
+  child component should show its own fallback without blocking the whole page.
 
 ---
 
-## 4. Стилі (CSS) і шрифти при SSR — коли миготить і як прибрати
+## 4. Styles (CSS) and fonts with SSR — when it flashes and how to fix it
 
-Часте питання: «чи треба щось робити, щоб стилі прийшли одразу при SSR?».
-Коротко — **у проді ні: стилі вже в `<head>` до першого показу**. Спалах
-нестилізованого контенту (FOUC), який інколи видно, — це майже завжди `nuxt dev`.
+A common question: "do I need to do anything for styles to arrive right away with SSR?".
+In short — **in production, no: styles are already in `<head>` before first paint**. The flash
+of unstyled content (FOUC) you sometimes see is almost always `nuxt dev`.
 
-### 4.1 Чому в `dev` миготить, а в проді ні
-Nuxt резолвить `features.inlineStyles` так (спрощено, `@nuxt/schema` 4.x):
-- **`nuxt dev`** → `inlineStyles` примусово `false`. Vite віддає CSS через JS і вставляє
-  `<style>` **після** гідрації → звідси FOUC. Тільки в деві.
-- **`nuxt build` (ssr:true)** → дефолт `id => id.includes('.vue')`: стилі компонентів
-  **інлайняться в HTML**.
+### 4.1 Why it flashes in `dev` but not in production
+Nuxt resolves `features.inlineStyles` like this (simplified, `@nuxt/schema` 4.x):
+- **`nuxt dev`** → `inlineStyles` is forced to `false`. Vite serves CSS through JS and inserts
+  `<style>` **after** hydration → hence the FOUC. Dev only.
+- **`nuxt build` (ssr:true)** → default `id => id.includes('.vue')`: component styles
+  are **inlined into the HTML**.
 
-### 4.2 Що летить у HTML у проді
+### 4.2 What goes into the HTML in production
 
-| Джерело | Доставка при SSR | Коли готове |
+| Source | Delivery with SSR | Ready when |
 |---|---|---|
-| Глобальний CSS — `~/core/tokens/main.css` + Tailwind | **інлайн** `<style>` у `<head>` | разом з HTML, 0 окремих запитів |
-| Стилі `.vue`-компонентів (`<style scoped>`) | **інлайн** `<style>` у `<head>` | разом з HTML |
+| Global CSS — `~/core/tokens/main.css` + Tailwind | **inline** `<style>` in `<head>` | with the HTML, 0 extra requests |
+| `.vue` component styles (`<style scoped>`) | **inline** `<style>` in `<head>` | with the HTML |
 
-Тут `features.inlineStyles: true` (§4.3) — тож окремого `<link rel="stylesheet">` немає,
-стилі приходять у самому документі. Браузер малює одразу після парсингу HTML, без
-render-blocking round-trip на CSS. **FOUC у проді немає.**
+Here `features.inlineStyles: true` (§4.3) — so there is no separate `<link rel="stylesheet">`,
+styles arrive in the document itself. The browser paints right after parsing the HTML, without a
+render-blocking round-trip for CSS. **No FOUC in production.**
 
-> Перевірено на прод-білді: у `<head>` один `<style>` (увесь CSS проекту, ~2.86 KB gzip)
-> і `<link rel="preload" as="font">`, а `<link rel="stylesheet">` **відсутній**.
+> Verified on a production build: `<head>` has one `<style>` (the entire project CSS, ~2.86 KB gzip)
+> and a `<link rel="preload" as="font">`, while `<link rel="stylesheet">` is **absent**.
 
-### 4.3 Як увімкнено: `inlineStyles: true`
-Проект інлайнить увесь CSS у HTML:
+### 4.3 How it's enabled: `inlineStyles: true`
+The project inlines all CSS into the HTML:
 ```ts
 // nuxt.config.ts
 features: { inlineStyles: true }
 ```
-**Чому це тут виправдано:** зібраний CSS крихітний — **~11.6 KB (2.86 KB gzip)**. Інлайн
-економить render-blocking round-trip на першому показі (браузер не тягне окремий `.css`),
-а «мінус» — CSS не кешується окремо між сторінками — при 3 KB мізерний.
+**Why this is justified here:** the built CSS is tiny — **~11.6 KB (2.86 KB gzip)**. Inlining
+saves a render-blocking round-trip on first paint (the browser doesn't fetch a separate `.css`),
+and the downside — CSS not being cached separately across pages — is negligible at 3 KB.
 
-**Коли вимкнути (`inlineStyles: false`):** якщо CSS розросте до десятків/сотень KB — тоді
-один спільний кешований `<link>` вигідніший за інлайн у кожну відповідь.
+**When to disable it (`inlineStyles: false`):** if the CSS grows to tens/hundreds of KB — then
+one shared cached `<link>` beats inlining into every response.
 
-### 4.4 Шрифти — окрема вісь (FOUT, не CSS)
-Навіть коли CSS на місці, self-hosted шрифт із `font-display: swap` дає **FOUT**: спершу
-системний шрифт, потім перестрибування на свій — бо `.woff2` тягнеться асинхронно. CSS
-тут ні до чого.
+### 4.4 Fonts — a separate axis (FOUT, not CSS)
+Even with CSS in place, a self-hosted font with `font-display: swap` causes **FOUT**: first
+the system font, then a jump to your own — because the `.woff2` is fetched asynchronously. CSS
+has nothing to do with it.
 
-Як зроблено в проекті (шрифт — **Montserrat**, variable):
-1. **woff2, не ttf.** Сирий Google-`.ttf` (~688 KB) сконвертовано в `.woff2` (~214 KB) —
-   variable-вісь `wght 100–900` лишається в одному файлі:
+How it's done in the project (the font is **Montserrat**, variable):
+1. **woff2, not ttf.** The raw Google `.ttf` (~688 KB) was converted to `.woff2` (~214 KB) —
+   the variable `wght 100–900` axis stays in a single file:
    `npx --yes ttf2woff2 < in.ttf > out.woff2`.
-2. **Публічний, нехешований шлях.** Файли в `public/fonts/`
-   (`/fonts/Montserrat-Variable.woff2`), не в бандлі — бо preload потребує стабільного
-   URL, а бандл дає хеш.
-3. **`@font-face`** у `app/core/tokens/fonts.css` вказує на цей `/fonts/…`;
-   `typography.ts` виставляє `fontFamily` на `Montserrat`.
-4. **Guarded preload** у `nuxt.config.ts`:
+2. **Public, unhashed path.** Files live in `public/fonts/`
+   (`/fonts/Montserrat-Variable.woff2`), not in the bundle — because preload needs a stable
+   URL, and the bundle produces a hash.
+3. **`@font-face`** in `app/core/tokens/fonts.css` points to that `/fonts/…`;
+   `typography.ts` sets `fontFamily` to `Montserrat`.
+4. **Guarded preload** in `nuxt.config.ts`:
    ```ts
    const CRITICAL_FONT = 'Montserrat-Variable.woff2'
    const fontPreload = existsSync(fileURLToPath(new URL(`./public/fonts/${CRITICAL_FONT}`, import.meta.url)))
@@ -177,137 +177,137 @@ features: { inlineStyles: true }
    // ...
    app: { head: { link: [...fontPreload] } },
    ```
-   `existsSync` — щоб `<link>` додавався, ЛИШЕ коли файл реально є (інакше 404 +
-   «preloaded but not used»). `crossorigin` для шрифтів обов'язковий, інакше браузер
-   тягне файл двічі.
+   `existsSync` — so the `<link>` is added ONLY when the file actually exists (otherwise 404 +
+   "preloaded but not used"). `crossorigin` is mandatory for fonts, otherwise the browser
+   fetches the file twice.
 
-> Альтернатива без ручного шляху — модуль `@nuxt/fonts` (сам знаходить `@font-face`,
-> self-host'ить, додає preload). Зараз не підключений.
+> An alternative without the manual path — the `@nuxt/fonts` module (finds `@font-face` itself,
+> self-hosts, adds preload). Not wired up at the moment.
 
-### 4.5 Як перевірити (не по `dev`!)
+### 4.5 How to verify (not on `dev`!)
 ```bash
 npm run build && npm run preview
 ```
-`view-source` сторінки → у `<head>` є інлайн `<style>` (увесь CSS — бо `inlineStyles:
-true`) і `<link rel="preload" as="font">` (шрифт), а окремого `<link rel="stylesheet">`
-нема. У `dev` натомість інлайн вимкнено (CSS через JS) — тому й перевіряй на `build`.
+`view-source` of the page → `<head>` has an inline `<style>` (all the CSS — because `inlineStyles:
+true`) and a `<link rel="preload" as="font">` (the font), and no separate `<link rel="stylesheet">`.
+In `dev`, inlining is disabled (CSS via JS) — which is why you verify on `build`.
 
 ---
 
-## 5. Що працює лише на клієнті (і як це позначити)
+## 5. What runs only on the client (and how to mark it)
 
-Код, який чіпає браузерні API, **впаде на сервері** (`window`, `document`,
-`localStorage`, `navigator` там не існують). Захищай так:
+Code that touches browser APIs **crashes on the server** (`window`, `document`,
+`localStorage`, `navigator` don't exist there). Guard it like this:
 
-| Інструмент | Навіщо |
+| Tool | Why |
 |---|---|
-| `<ClientOnly>` | Обгортка навколо компонента, який рендериться **тільки** в браузері (не-SSR-safe бібліотеки, віджети на `window`). |
-| `import.meta.client` / `import.meta.server` | Гілкування коду по середовищу. Є в `useServerQuery`, `createHttp`, плагіні `vue-query`. |
-| `onMounted(() => …)` | Виконується лише на клієнті після монтування — безпечне місце для `window`/`document`. |
+| `<ClientOnly>` | Wrapper around a component that renders **only** in the browser (non-SSR-safe libraries, widgets on `window`). |
+| `import.meta.client` / `import.meta.server` | Branching code by environment. Used in `useServerQuery`, `createHttp`, the `vue-query` plugin. |
+| `onMounted(() => …)` | Runs only on the client after mount — a safe place for `window`/`document`. |
 
 ```vue
 <ClientOnly>
   <HeavyBrowserWidget />
-  <template #fallback>Завантаження…</template>
+  <template #fallback>Loading…</template>
 </ClientOnly>
 ```
 
 ---
 
-## 6. Що працює лише на сервері (серверні компоненти та серверний код)
+## 6. What runs only on the server (server components and server code)
 
-Симетрично до §5: є речі, які мають жити **тільки на сервері** — секрети, ключі до
-API, доступ до БД, важкі залежності, яких не хочеш у клієнтському бандлі.
+Symmetric to §5: some things must live **only on the server** — secrets, API
+keys, DB access, heavy dependencies you don't want in the client bundle.
 
-### 6.1 Серверні компоненти (Nuxt Server Components / islands)
-- **Що:** компонент, що рендериться **лише на сервері** й віддає готовий HTML **без
-  JS** у клієнтський бандл. Протилежність `<ClientOnly>`.
-- **Коли:** важкий/статичний контент (рендер Markdown, підсвітка коду, великі
-  залежності), якому не потрібен інтерактив на клієнті → менший JS-бандл.
-- **Як:** експериментальна фіча — вмикається `experimental: { componentIslands: true }`
-  у `nuxt.config`. Далі компонент із суфіксом `Name.server.vue` або `<NuxtIsland>`.
-  Інтерактивні вставки всередині острова — через `nuxt-client` (окреме налаштування).
-- **Статус у проекті:** зараз **не** увімкнено (немає потреби). Це опційно.
+### 6.1 Server components (Nuxt Server Components / islands)
+- **What:** a component rendered **only on the server** that ships ready HTML with **no
+  JS** in the client bundle. The opposite of `<ClientOnly>`.
+- **When:** heavy/static content (Markdown rendering, code highlighting, big
+  dependencies) that needs no client interactivity → smaller JS bundle.
+- **How:** an experimental feature — enabled with `experimental: { componentIslands: true }`
+  in `nuxt.config`. Then a component with the `Name.server.vue` suffix or `<NuxtIsland>`.
+  Interactive inserts inside an island — via `nuxt-client` (a separate setting).
+- **Status in the project:** currently **not** enabled (no need). This is optional.
 
-| Тип компонента | Рендер | JS на клієнті | Коли |
+| Component type | Renders | JS on the client | When |
 |---|---|---|---|
-| Звичайний | сервер + клієнт (hydration) | так | дефолт, є інтерактив |
-| `<ClientOnly>` | лише клієнт | так | браузерні API |
-| Серверний (`*.server.vue`) | лише сервер | ні | статика, важкі залежності, без інтерактиву |
+| Regular | server + client (hydration) | yes | default, has interactivity |
+| `<ClientOnly>` | client only | yes | browser APIs |
+| Server (`*.server.vue`) | server only | no | static content, heavy dependencies, no interactivity |
 
-### 6.2 Серверний код — директорія `server/` (Nitro)
-Тут живе **бекенд** застосунку. У цьому проекті — `server/api` + `server/repositories`.
+### 6.2 Server code — the `server/` directory (Nitro)
+This is where the app's **backend** lives. In this project — `server/api` + `server/repositories`.
 
-| Папка | Що | У проекті |
+| Folder | What | In the project |
 |---|---|---|
-| `server/api/*` | HTTP-ендпоінти (`defineEventHandler`) | `news.get.ts`, `bookmarks.get/post.ts` |
-| `server/repositories/*` | серверний data-access: зовнішні API, БД, **секрети** | `newsRepository.ts` (ключ newsdata.io), `bookmarksRepository.ts` |
-| `server/routes/*` | не-`/api` маршрути (напр. `/sitemap.xml`) | — |
-| `server/middleware/*` | код на **кожен** запит (auth, заголовки) | — |
-| `server/plugins/*` | хуки життєвого циклу Nitro | — |
-| `server/utils/*` | автоімпортовані серверні хелпери | — |
+| `server/api/*` | HTTP endpoints (`defineEventHandler`) | `news.get.ts`, `bookmarks.get/post.ts` |
+| `server/repositories/*` | server data access: external APIs, DB, **secrets** | `newsRepository.ts` (newsdata.io key), `bookmarksRepository.ts` |
+| `server/routes/*` | non-`/api` routes (e.g. `/sitemap.xml`) | — |
+| `server/middleware/*` | code on **every** request (auth, headers) | — |
+| `server/plugins/*` | Nitro lifecycle hooks | — |
+| `server/utils/*` | auto-imported server helpers | — |
 
-### 6.3 Серверні утиліти, які знадобляться
-- **`useRuntimeConfig(event)`** — читати приватний конфіг/секрети (лише сервер);
-  напр. `server/api/news.get.ts` бере `newsApiKey`.
-- **`createError({ statusCode, statusMessage })`** — кинути HTTP-помилку з роуту.
-- **`defineCachedEventHandler` / `routeRules`** (`swr`, `isr`, `cache`) — серверне
-  кешування відповіді.
-- **`import.meta.server`** — гілка коду лише для сервера (є в `useServerQuery`, плагіні
-  `vue-query`).
+### 6.3 Server utilities you'll need
+- **`useRuntimeConfig(event)`** — read private config/secrets (server only);
+  e.g. `server/api/news.get.ts` reads `newsApiKey`.
+- **`createError({ statusCode, statusMessage })`** — throw an HTTP error from a route.
+- **`defineCachedEventHandler` / `routeRules`** (`swr`, `isr`, `cache`) — server-side
+  response caching.
+- **`import.meta.server`** — server-only code branch (used in `useServerQuery`, the
+  `vue-query` plugin).
 
-**Головне правило:** усе, що містить **секрет** (API-ключ, токен, доступ до БД), має
-бути на сервері. Саме тому ключ newsdata.io лежить у
-`server/repositories/newsRepository.ts`, а сторінка звертається до нього через власний
-роут `/api/news`, а не напряму.
-
----
-
-## 7. Типові граблі SSR
-
-1. **Hydration mismatch** — HTML із сервера має збігатися з першим рендером на
-   клієнті. Ламають: `Date.now()`, `Math.random()`, гілки по `window` під час рендеру,
-   різні локаль/таймзона. Лікування: винести в `<ClientOnly>` або `onMounted`.
-2. **Спалах «Loading…» при переході** — якщо запит стартує лише в браузері. Для SSR-
-   сторінки рішення — `await` у setup (див. §3), як зроблено в `news-ssr.vue`.
-3. **Стрибки картинок (CLS)** — `<NuxtImg>` без зарезервованої висоти штовхає контент,
-   коли зображення довантажилось. Задавай фіксований бокс: `width` + `height` **та**
-   класи `h-/w-` (бо Tailwind preflight ставить `img{height:auto}` і перебиває атрибут),
-   плюс `object-cover`. Приклад — `news-ssr.vue`.
-4. **`window is not defined`** — звернення до браузерного API на top-level setup.
-   Загорни в `import.meta.client` / `onMounted`.
-5. **Батьківський `v-if` залежить від стану, який пише дитина** — на SSR батько (layout)
-   вирішує `v-if` **раніше**, ніж дочірня сторінка встигне наповнити `useState`. Тоді SSR
-   рендерить одну гілку, а клієнт (стан уже з payload) — іншу → hydration mismatch і стрибок
-   розкладки. Було саме так із `usePageCode` + грідом у `default.vue`. Лікування: гейтити
-   структурний `v-if` на **`route.meta`** (`definePageMeta`), а не на стані від дитини —
-   мета доступна до рендеру й однакова SSR↔client. Приклад: `hasCode: true` у сторінках +
-   `computed(() => Boolean(route.meta.hasCode))` у layout.
+**The main rule:** anything containing a **secret** (API key, token, DB access) must
+live on the server. That's exactly why the newsdata.io key lives in
+`server/repositories/newsRepository.ts`, and the page reaches it through its own
+`/api/news` route, not directly.
 
 ---
 
-## 8. Куди дивитись у коді
+## 7. Common SSR pitfalls
 
-| Хочу побачити… | Файл |
+1. **Hydration mismatch** — the server HTML must match the first client render.
+   Broken by: `Date.now()`, `Math.random()`, branching on `window` during render,
+   different locale/timezone. Fix: move it into `<ClientOnly>` or `onMounted`.
+2. **"Loading…" flash on navigation** — when the request starts only in the browser. For an SSR
+   page the fix is `await` in setup (see §3), as done in `news-ssr.vue`.
+3. **Image jumps (CLS)** — `<NuxtImg>` without a reserved height pushes content
+   when the image finishes loading. Set a fixed box: `width` + `height` **and**
+   `h-/w-` classes (because Tailwind preflight sets `img{height:auto}` and overrides the attribute),
+   plus `object-cover`. Example — `news-ssr.vue`.
+4. **`window is not defined`** — accessing a browser API at top-level setup.
+   Wrap it in `import.meta.client` / `onMounted`.
+5. **A parent `v-if` depends on state written by a child** — during SSR the parent (layout)
+   resolves the `v-if` **before** the child page manages to populate `useState`. So SSR
+   renders one branch and the client (state already in the payload) renders another → hydration mismatch and a layout
+   jump. This is exactly what happened with `usePageCode` + the grid in `default.vue`. Fix: gate the
+   structural `v-if` on **`route.meta`** (`definePageMeta`), not on state from the child —
+   meta is available before render and identical SSR↔client. Example: `hasCode: true` in pages +
+   `computed(() => Boolean(route.meta.hasCode))` in the layout.
+
+---
+
+## 8. Where to look in the code
+
+| I want to see… | File |
 |---|---|
-| Усі приклади на одній сторінці | `app/pages/index.vue` |
-| SSR + кеш | `app/pages/news-ssr.vue` + `app/core/composables/useServerQuery.ts` |
-| Client-only + кеш | `app/pages/news-spa.vue` + `app/core/composables/useClientQuery.ts` |
-| Разовий запит | `app/pages/news-oneoff.vue` + `app/core/composables/useApi.ts` |
-| Мутація + інвалідація | `app/pages/bookmarks.vue` + `app/core/composables/useApiMutation.ts` |
-| Гідрація TanStack (dehydrate/hydrate) | `app/core/plugins/vue-query.ts` |
-| Стилі/шрифти при SSR (inline + preload) | §4 + `nuxt.config.ts` (`inlineStyles`, `fontPreload`) + `public/fonts/` |
-| Серверний ендпоінт + секрети | `server/api/news.get.ts` + `server/repositories/newsRepository.ts` |
-| Серверні компоненти (islands) | `experimental.componentIslands` у `nuxt.config` (опційно) |
-| Вимкнути SSR на маршруті | `nuxt.config.ts` → `routeRules` |
+| All examples on one page | `app/pages/index.vue` |
+| SSR + cache | `app/pages/news-ssr.vue` + `app/core/composables/useServerQuery.ts` |
+| Client-only + cache | `app/pages/news-spa.vue` + `app/core/composables/useClientQuery.ts` |
+| One-off request | `app/pages/news-oneoff.vue` + `app/core/composables/useApi.ts` |
+| Mutation + invalidation | `app/pages/bookmarks.vue` + `app/core/composables/useApiMutation.ts` |
+| TanStack hydration (dehydrate/hydrate) | `app/core/plugins/vue-query.ts` |
+| Styles/fonts with SSR (inline + preload) | §4 + `nuxt.config.ts` (`inlineStyles`, `fontPreload`) + `public/fonts/` |
+| Server endpoint + secrets | `server/api/news.get.ts` + `server/repositories/newsRepository.ts` |
+| Server components (islands) | `experimental.componentIslands` in `nuxt.config` (optional) |
+| Disable SSR on a route | `nuxt.config.ts` → `routeRules` |
 
 ---
 
 ## TL;DR
 
-- За замовчуванням — **SSR**; вимикай точково для приватних/важко-інтерактивних сторінок.
-- Просто дані в HTML → **`useFetch`**. Треба ще кеш/інвалідація → **`useServerQuery`**.
-- Клієнтська сторінка (ssr:false) → **`useClientQuery`**. Разово → **`useApi`**. Зміни → **`useApiMutation`**.
-- `<Suspense>` дає Nuxt — просто став `await` у setup. Браузерне — у `<ClientOnly>` / `onMounted` / `import.meta.client`.
-- Стилі при SSR — інлайняться в HTML (`features.inlineStyles: true`), тож приходять з документом (FOUC буває лише в `dev`). Шрифти → `preload` woff2 зі стабільного `public/fonts/` проти FOUT.
-- Секрети/ключі/БД/важкі залежності → **сервер**: `server/api` + `server/repositories`, за потреби серверні компоненти (`*.server.vue`).
+- Default to **SSR**; disable it selectively for private/heavily interactive pages.
+- Just need data in the HTML → **`useFetch`**. Also need cache/invalidation → **`useServerQuery`**.
+- Client-only page (ssr:false) → **`useClientQuery`**. One-off → **`useApi`**. Changes → **`useApiMutation`**.
+- Nuxt provides `<Suspense>` — just put `await` in setup. Browser-only code → `<ClientOnly>` / `onMounted` / `import.meta.client`.
+- Styles with SSR are inlined into the HTML (`features.inlineStyles: true`), so they arrive with the document (FOUC happens only in `dev`). Fonts → `preload` a woff2 from the stable `public/fonts/` against FOUT.
+- Secrets/keys/DB/heavy dependencies → **server**: `server/api` + `server/repositories`, and server components (`*.server.vue`) if needed.

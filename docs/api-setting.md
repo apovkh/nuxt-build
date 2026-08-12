@@ -1,27 +1,27 @@
-# API composables — коли що можливо
+# API composables — what is possible when
 
-Ідея: замість того щоб кожного разу пам'ятати про `onServerPrefetch`, `staleTime`, кеш чи його відсутність — інкапсулюємо кожен сценарій у власний composable. Нижче 4 випадки: **для яких з них це реально можливо і має сенс**, а де composable вироджується в тонку обгортку.
+The idea: instead of remembering `onServerPrefetch`, `staleTime`, cache or its absence every time — encapsulate each scenario in its own composable. Below are 4 cases: **for which of them this is actually possible and makes sense**, and where the composable degenerates into a thin wrapper.
 
-Передумова для всіх Query-варіантів: один раз налаштований плагін `plugins/vue-query.ts` (dehydrate/hydrate + дефолтний `staleTime`). Без нього SSR-кешування не працює.
+Prerequisite for all Query variants: the `plugins/vue-query.ts` plugin set up once (dehydrate/hydrate + default `staleTime`). Without it, SSR caching does not work.
 
 ---
 
-## Зведена таблиця
+## Summary table
 
-| # | Сценарій | Composable | Кеш | Виконується на сервері | Реалізовується як |
+| # | Scenario | Composable | Cache | Runs on the server | Implemented as |
 |---|----------|-----------|-----|------------------------|-------------------|
-| 1 | SSR-запит з кешуванням | `useServerQuery` | ✅ | ✅ (prefetch у payload) | `useQuery` + `onServerPrefetch` |
-| 2 | Клієнтський запит з кешуванням | `useClientQuery` | ✅ | ❌ | `useQuery` без prefetch |
-| 3 | Команда на бекенд без даних | `useApiMutation` | — (нема що кешувати) | ❌ | `useMutation` |
-| 4 | Запит повертає дані, але без кешу (просто запит) | `useApi` | ❌ | за бажанням | голий `$fetch` |
+| 1 | SSR request with caching | `useServerQuery` | ✅ | ✅ (prefetch into payload) | `useQuery` + `onServerPrefetch` |
+| 2 | Client-side request with caching | `useClientQuery` | ✅ | ❌ | `useQuery` without prefetch |
+| 3 | Command to the backend without data | `useApiMutation` | — (nothing to cache) | ❌ | `useMutation` |
+| 4 | Request returns data but no cache (plain request) | `useApi` | ❌ | optional | bare `$fetch` |
 
-Висновок наперед: **випадки 1–3 — повноцінні, самодостатні composables. Випадок 4 — можливий, але це фактично `$fetch`; TanStack Query тут не потрібен, бо `useQuery` завжди кешує.**
+Conclusion up front: **cases 1–3 are full-fledged, self-sufficient composables. Case 4 is possible, but it is effectively `$fetch`; TanStack Query is not needed here, because `useQuery` always caches.**
 
 ---
 
-## Випадок 1 — SSR + кеш (`useServerQuery`) ✅ повністю можливо
+## Case 1 — SSR + cache (`useServerQuery`) ✅ fully possible
 
-Головний сценарій. Дані фетчаться на сервері, серіалізуються в payload, на клієнті беруться з кешу без повторного мережевого запиту.
+The main scenario. Data is fetched on the server, serialized into the payload, and taken from the cache on the client without a repeated network request.
 
 ```ts
 // composables/useServerQuery.ts
@@ -30,32 +30,32 @@ import { onServerPrefetch } from 'vue'
 
 export function useServerQuery<T>(options: UseQueryOptions<T>) {
   const query = useQuery(options)
-  // виконати запит на сервері ДО рендера → потрапить у dehydrate
+  // run the request on the server BEFORE render → it ends up in dehydrate
   onServerPrefetch(() => query.suspense().catch(() => {}))
   return query
 }
 ```
 
-Чому можливо: `onServerPrefetch` + `suspense()` змушують запит завершитися на сервері; плагін dehydrate'ить результат; `staleTime > 0` не дає клієнту рефетчити одразу після гідрації.
+Why it is possible: `onServerPrefetch` + `suspense()` force the request to complete on the server; the plugin dehydrates the result; `staleTime > 0` keeps the client from refetching right after hydration.
 
-Використання:
+Usage:
 ```ts
 const { data, isPending } = useServerQuery(todosQuery())
 ```
 
 ---
 
-## Випадок 2 — клієнтський кеш (`useClientQuery`) ✅ можливо
+## Case 2 — client-side cache (`useClientQuery`) ✅ possible
 
-Запит не потрібен у SSR-розмітці (наприклад, дані під логіном, віджет після mount), але хочемо кеш, ретраї, `invalidateQueries`.
+The request is not needed in the SSR markup (e.g. data behind a login, a widget after mount), but we want cache, retries, `invalidateQueries`.
 
 ```ts
 // composables/useClientQuery.ts
 import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
 
 export function useClientQuery<T>(options: UseQueryOptions<T>) {
-  // без onServerPrefetch → на сервері запит не піде.
-  // enabled на клієнті гарантує, що queryFn не викличеться під час SSR
+  // no onServerPrefetch → the request will not run on the server.
+  // enabled on the client guarantees queryFn is not called during SSR
   return useQuery({
     ...options,
     enabled: import.meta.client && (options.enabled ?? true),
@@ -63,13 +63,13 @@ export function useClientQuery<T>(options: UseQueryOptions<T>) {
 }
 ```
 
-Чому можливо: відсутність `onServerPrefetch` вже означає «не фетчити на сервері», а `enabled: import.meta.client` — страховка, якщо `queryFn` не можна виконувати на сервері взагалі. Кеш повноцінний, просто заповнюється на клієнті.
+Why it is possible: the absence of `onServerPrefetch` already means "do not fetch on the server", and `enabled: import.meta.client` is a safeguard in case `queryFn` must not run on the server at all. The cache is fully functional, it is just populated on the client.
 
 ---
 
-## Випадок 3 — команда без даних (`useApiMutation`) ✅ можливо
+## Case 3 — command without data (`useApiMutation`) ✅ possible
 
-POST/PUT/PATCH/DELETE — щось змінюємо, відповідь-дані не кешуємо (і часто не використовуємо). Кешування тут концептуально не застосовне; натомість — статуси `isPending`/`isError` і `invalidateQueries` після успіху.
+POST/PUT/PATCH/DELETE — we change something, the response data is not cached (and often not used). Caching is conceptually not applicable here; instead — `isPending`/`isError` statuses and `invalidateQueries` after success.
 
 ```ts
 // composables/useApiMutation.ts
@@ -90,40 +90,40 @@ export function useApiMutation<TData, TVars>(
 }
 ```
 
-Використання:
+Usage:
 ```ts
 const { mutate, isPending } = useApiMutation({
   mutationFn: (body) => $fetch('/api/todos', { method: 'POST', body }),
-  invalidate: [['todos']], // автоматично оновити список після створення
+  invalidate: [['todos']], // automatically refresh the list after creation
 })
 ```
 
-Чому можливо: мутації завжди клієнтські, кеш не потрібен — composable дає уніфіковану обробку помилок і інвалідацію.
+Why it is possible: mutations are always client-side, no cache is needed — the composable provides unified error handling and invalidation.
 
 ---
 
-## Випадок 4 — дані без кешу (`useApi`) ⚠️ можливо, але це просто `$fetch`
+## Case 4 — data without cache (`useApi`) ⚠️ possible, but it is just `$fetch`
 
-Разовий запит, результат якого не треба тримати в кеші (одноразова перевірка, експорт, службовий виклик). Тут `useQuery` **не підходить** — він завжди кешує. Правильний інструмент — `$fetch`, а composable виходить тонким:
+A one-off request whose result does not need to be kept in the cache (a one-time check, an export, a utility call). `useQuery` **does not fit** here — it always caches. The right tool is `$fetch`, and the composable ends up thin:
 
 ```ts
 // composables/useApi.ts
-// ⚠️ ПРОСТО запит — без кешу, без TanStack, без SSR-payload. Для разових викликів.
+// ⚠️ PLAIN request — no cache, no TanStack, no SSR payload. For one-off calls.
 export function useApi<T>(url: string, opts?: Parameters<typeof $fetch>[1]) {
-  return $fetch<T>(url, opts) // без кешу, повертає Promise<T>
+  return $fetch<T>(url, opts) // no cache, returns Promise<T>
 }
 ```
 
-Чому «вироджений»: сенс TanStack Query — саме кеш. Якщо кеш не потрібен, обгортка над `$fetch` не додає нічого, крім типізації. Тому:
+Why it is "degenerate": the whole point of TanStack Query is the cache. If the cache is not needed, a wrapper over `$fetch` adds nothing but typing. Therefore:
 
-- потрібні лише дані без кешу, **на клієнті** → `useApi` / прямий `$fetch`;
-- потрібні дані без TanStack-кешу, але **з SSR-payload transfer** → це вже не Query-світ, а вбудований `useFetch` / `useAsyncData` Nuxt.
+- only data without cache is needed, **on the client** → `useApi` / direct `$fetch`;
+- data without the TanStack cache is needed, but **with SSR payload transfer** → this is no longer the Query world, but Nuxt's built-in `useFetch` / `useAsyncData`.
 
 ---
 
-## Підсумок «що можливо»
+## "What is possible" summary
 
-- **Можливо і варто робити окремим composable:** випадки 1, 2, 3 — у кожного своя нетривіальна конфігурація (prefetch, `enabled`, invalidation), яку корисно сховати.
-- **Можливо, але зайве:** випадок 4 — це `$fetch`; окремий composable виправданий хіба заради єдиного стилю імпортів. Для SSR без кешу бери `useFetch`, а не TanStack.
+- **Possible and worth making a separate composable:** cases 1, 2, 3 — each has its own non-trivial configuration (prefetch, `enabled`, invalidation) that is useful to hide.
+- **Possible, but redundant:** case 4 — it is `$fetch`; a separate composable is justified only for a uniform import style. For SSR without cache, use `useFetch`, not TanStack.
 
-Тобто твої «3–4 функції» реально складаються так: **3 повноцінні** (`useServerQuery`, `useClientQuery`, `useApiMutation`) + **1 тонка** (`useApi` — просто запит), і всі чотири покривають перелічені сценарії.
+So your "3–4 functions" actually break down like this: **3 full-fledged** (`useServerQuery`, `useClientQuery`, `useApiMutation`) + **1 thin** (`useApi` — a plain request), and all four cover the listed scenarios.
