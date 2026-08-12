@@ -1,17 +1,9 @@
 # feedback/
 
-Алерти, тости, прогрес, стани завантаження й порожнечі.
-
-**Реалізовано:** `UIEmptyState`, `UITooltip`.
-
-Нижче — план, а не опис наявного.
-
-| Component | Vuetify base | Що додає |
-| --- | --- | --- |
-| `UIAlert` | `VAlert` | Пресети кольорів (info/success/warning/error) |
-| `UISnackbar` | `VSnackbar` | Програмний виклик через композабл-нотифікатор |
-| `UINotification` | composite (`VSnackbar` / overlay) | Тост із заголовком, тілом і діями; стекування |
-| `UIProgressBar` | `VProgressLinear` | Determinate/indeterminate, пресети кольорів |
+| `UIAlert` | `VAlert` | Color presets (info/success/warning/error) |
+| `UISnackbar` | `VSnackbar` | Programmatic calls via a notifier composable |
+| `UINotification` | composite (`VSnackbar` / overlay) | Toast with title, body, and actions; stacking |
+| `UIProgressBar` | `VProgressLinear` | Determinate/indeterminate, color presets |
 | `UIProgressCircular` | `VProgressCircular` | — |
-| `UISkeletonLoader` | `VSkeletonLoader` | Шаблони: card, list, table |
-| `UIErrorState` | composite | Для 4xx/5xx усередині компонентів (не route-level) |
+| `UISkeletonLoader` | `VSkeletonLoader` | Templates: card, list, table |
+| `UIErrorState` | composite | For 4xx/5xx inside components (not route-level) |

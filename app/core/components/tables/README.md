@@ -1,14 +1,10 @@
 # tables/
 
-Таблиці даних і віртуальний скрол.
+Data tables and virtual scrolling.
 
-**Реалізовано:** `UITable` + `UITableGroupOpenBtn`.
+**Implemented:** `UITable` + `UITableGroupOpenBtn`.
 
-Нижче — план, а не опис наявного.
-
-| Component | Vuetify base | Що додає |
-| --- | --- | --- |
-| `UITableServer` | `VDataTableServer` | Серверні пагінація/сортування через TanStack Query |
-| `UIVirtualTable` | `VDataTableVirtual` | Списки на тисячі рядків |
-| `UIVirtualScroll` | `VVirtualScroll` | Віртуальний скрол для не-табличних списків |
-| `UITableActions` | composite | Іконки-дії + підтвердження + тултип одним рядком |
+| `UITableServer` | `VDataTableServer` | Server-side pagination/sorting via TanStack Query |
+| `UIVirtualTable` | `VDataTableVirtual` | Lists with thousands of rows |
+| `UIVirtualScroll` | `VVirtualScroll` | Virtual scrolling for non-table lists |
+| `UITableActions` | composite | Action icons + confirmation + tooltip in one row |

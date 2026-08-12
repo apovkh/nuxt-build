@@ -1,15 +1,9 @@
 # form/
 
-Обгортка форми, групування полів і сабміт.
+Form wrapper, field grouping, and submit.
 
-**Реалізовано:** нічого.
-
-Нижче — план, а не опис наявного.
-
-| Component | Vuetify base | Що додає |
-| --- | --- | --- |
-| `UIValidation` | renderless | Передає `rules` + `model-value` через scoped slot |
-| `UIForm` | `VForm` | `v-model:valid`, дефолти, submit-хендлер із prevention |
-| `UIFormField` | composite | Обгортка label + hint + error для довгих форм |
-| `UIFieldset` | `<fieldset>` + slots | Група пов'язаних полів із заголовком |
-| `UISubmitBtn` | `UIBtn` + контекст форми | Авто-disabled, поки форма невалідна або в польоті |
+| `UIValidation` | renderless | Passes `rules` + `model-value` through a scoped slot |
+| `UIForm` | `VForm` | `v-model:valid`, defaults, submit handler with prevention |
+| `UIFormField` | composite | Label + hint + error wrapper for long forms |
+| `UIFieldset` | `<fieldset>` + slots | Group of related fields with a heading |
+| `UISubmitBtn` | `UIBtn` + form context | Auto-disabled while the form is invalid or in flight |

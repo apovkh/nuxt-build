@@ -1,16 +1,12 @@
 # navigation/
 
-Таби, хлібні крихти, пагінація, drawer, степер, дерево.
+Tabs, breadcrumbs, pagination, drawer, stepper, tree.
 
-**Реалізовано:** `UITabs` + `UITabItem`.
+**Implemented:** `UITabs` + `UITabItem`.
 
-Нижче — план, а не опис наявного.
-
-| Component | Vuetify base | Що додає |
-| --- | --- | --- |
-| `UIBreadcrumbs` | `VBreadcrumbs` | Items у формі `{ label, to }` |
+| `UIBreadcrumbs` | `VBreadcrumbs` | `items` in the form `{ label, to }` |
 | `UIPagination` | `VPagination` | — |
-| `UINavDrawer` | `VNavigationDrawer` | Бічна навігація для layouts |
-| `UIAppBar` | `VAppBar` | Верхній хедер для layouts |
-| `UIStepper` | `VStepper` | Багатокрокові майстри |
-| `UITreeview` | `VTreeview` | Ієрархічні списки категорій |
+| `UINavDrawer` | `VNavigationDrawer` | Side navigation for layouts |
+| `UIAppBar` | `VAppBar` | Top header for layouts |
+| `UIStepper` | `VStepper` | Multi-step wizards |
+| `UITreeview` | `VTreeview` | Hierarchical category lists |

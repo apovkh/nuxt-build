@@ -1,19 +1,19 @@
 # inputs/
 
-Поля вводу. Підпис, підказка, лічильник і помилка живуть в `UILabel` —
-через нього рендеряться всі обгортки, тож зв'язок `<label for>` з інпутом
-і `aria-describedby` для помилки збираються в одному місці.
+Input fields. Label, hint, counter, and error live in `UILabel` —
+every wrapper renders through it, so the `<label for>` link to the input
+and `aria-describedby` for the error are wired up in one place.
 
-**Реалізовано:** `UILabel`, `UITextField`, `UITextarea`, `UISelect`, `UICheckbox` (+ `UICheckboxBtn`).
+**Implemented:** `UILabel`, `UITextField`, `UITextarea`, `UISelect`, `UICheckbox` (+ `UICheckboxBtn`).
 
-Нижче — план, а не опис наявного.
+Below is a plan, not a description of what exists.
 
-| Component | Vuetify base | Що додає |
+| Component | Vuetify base | What it adds |
 | --- | --- | --- |
-| `UIAutocomplete` | `VAutocomplete` | Пошук по списку |
-| `UIMultiSelect` | `VSelect` (multiple) | Мультивибір із чіпами |
+| `UIAutocomplete` | `VAutocomplete` | List search |
+| `UIMultiSelect` | `VSelect` (multiple) | Multi-select with chips |
 | `UIRadioGroup` + `UIRadio` | `VRadioGroup` + `VRadio` | — |
-| `UICheckboxGroup` | composite | Група чекбоксів з одним `v-model`-масивом |
+| `UICheckboxGroup` | composite | Checkbox group with a single `v-model` array |
 | `UISwitch` | `VSwitch` | — |
-| `UIFileInput` | `VFileInput` | Обмеження типу/розміру, прев'ю |
-| `UINumberInput` | `VNumberInput` | Крок, межі, форматування |
+| `UIFileInput` | `VFileInput` | Type/size limits, preview |
+| `UINumberInput` | `VNumberInput` | Step, bounds, formatting |

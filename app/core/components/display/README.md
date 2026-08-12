@@ -1,15 +1,8 @@
 # display/
 
-Чіпи, бейджі, аватари, списки.
-
-**Реалізовано:** нічого — `UIIcon` живе в `core/UIIcon`.
-
-Нижче — план, а не опис наявного.
-
-| Component | Vuetify base | Що додає |
 | --- | --- | --- |
-| `UIChip` | `VChip` | Теги й мітки з брендовими кольорами |
-| `UIBadge` | `VBadge` | Лічильники |
-| `UIAvatar` | `VAvatar` | Аватар з fallback-ініціалами |
-| `UIImage` | `NuxtImg` | `<img>` з lazy + fallback |
-| `UIList` + `UIListItem` | `VList` + `VListItem` | `<ul>` для меню та фільтрів |
+| `UIChip` | `VChip` | Tags and labels with brand colors |
+| `UIBadge` | `VBadge` | Counters |
+| `UIAvatar` | `VAvatar` | Avatar with fallback initials |
+| `UIImage` | `NuxtImg` | `<img>` with lazy + fallback |
+| `UIList` + `UIListItem` | `VList` + `VListItem` | `<ul>` for menus and filters |
