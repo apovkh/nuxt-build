@@ -7,7 +7,7 @@ definePageMeta({
   title: 'Create post',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'Posts', to: '/example-posts' },
     { title: 'Create' },
   ],

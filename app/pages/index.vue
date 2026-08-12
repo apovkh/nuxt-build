@@ -6,35 +6,35 @@ import type { Article } from '#shared/types/example/news'
 const { data: articles } = await useFetch<Article[]>('/api/example/news')
 
 const examples = [
-  { to: '/example-news-ssr', title: 'SSR + cache', composable: 'useServerQuery', note: 'ssr: true · дані в HTML (SEO)' },
-  { to: '/example-news-spa', title: 'Client cache', composable: 'useClientQuery', note: 'ssr: false · запит у браузері' },
-  { to: '/example-news-oneoff', title: 'One-off request', composable: 'useApi', note: 'без кешу, на вимогу' },
-  { to: '/example-bookmarks', title: 'Mutation + invalidate', composable: 'useApiMutation', note: 'POST + автооновлення списку' },
-  { to: '/example-errors', title: 'Обробка помилок', composable: 'useApiError + notifier', note: 'помилки по типах запитів' },
+  { to: '/example-news-ssr', title: 'SSR + cache', composable: 'useServerQuery', note: 'ssr: true · data in the HTML (SEO)' },
+  { to: '/example-news-spa', title: 'Client cache', composable: 'useClientQuery', note: 'ssr: false · request in the browser' },
+  { to: '/example-news-oneoff', title: 'One-off request', composable: 'useApi', note: 'no cache, on demand' },
+  { to: '/example-bookmarks', title: 'Mutation + invalidate', composable: 'useApiMutation', note: 'POST + auto-refreshed list' },
+  { to: '/example-errors', title: 'Error handling', composable: 'useApiError + notifier', note: 'errors per request type' },
 ]
 
 const forms = [
-  { to: '/example-form', title: 'Жива валідація', composable: 'useForm', note: 'клієнт + сервер (422)' },
-  { to: '/example-posts/create', title: 'Create post', composable: 'useForm + repo', note: 'addPost · валідація полів' },
-  { to: '/example-login', title: 'Login', composable: 'useForm + repo', note: 'login · токен у onSuccess' },
+  { to: '/example-form', title: 'Live validation', composable: 'useForm', note: 'client + server (422)' },
+  { to: '/example-posts/create', title: 'Create post', composable: 'useForm + repo', note: 'addPost · field validation' },
+  { to: '/example-login', title: 'Login', composable: 'useForm + repo', note: 'login · token in onSuccess' },
 ]
 </script>
 
 <template>
   <div class="mx-auto max-w-[1600px] px-6 pb-6 pt-4">
     <h1 class="text-2xl font-bold">
-      app/core — приклади data-fetching
+      app/core — data-fetching examples
     </h1>
     <p class="mt-1 text-sm">
-      Кожна сторінка демонструє свій composable ядра для сценарію SSR true / false.
+      Each page demonstrates its own core composable for the SSR true / false scenario.
     </p>
 
     <section class="mt-6">
       <h2 class="text-lg font-semibold">
-        Дизайн-система
+        Design system
       </h2>
       <p class="text-sm">
-        Кольори й типографіка ядра — одне джерело для Vuetify і Tailwind.
+        Core colors and typography — a single source for Vuetify and Tailwind.
       </p>
       <NuxtLink
         to="/tokens"
@@ -53,7 +53,7 @@ const forms = [
           </div>
           <code class="text-sm text-brand-primary">~/core/tokens</code>
           <div class="mt-1 text-xs">
-            палітра квадратами · текст різними кольорами й розмірами · перемикач теми
+            palette swatches · text in different colors and sizes · theme toggle
           </div>
         </div>
       </NuxtLink>
@@ -78,10 +78,10 @@ const forms = [
 
     <section class="mt-10">
       <h2 class="text-lg font-semibold">
-        Форми — <code>useForm</code>
+        Forms — <code>useForm</code>
       </h2>
       <p class="text-sm">
-        Клієнтська валідація (rules) + серверна (422) в один <code>errors</code>.
+        Client-side validation (rules) + server-side (422) merged into a single <code>errors</code>.
       </p>
       <ul class="mt-3 grid gap-3 sm:grid-cols-2">
         <li v-for="form in forms" :key="form.to">
@@ -103,10 +103,10 @@ const forms = [
 
     <section class="mt-10">
       <h2 class="text-lg font-semibold">
-        Native <code>useFetch</code> (SSR, без TanStack-кешу)
+        Native <code>useFetch</code> (SSR, no TanStack cache)
       </h2>
       <p class="text-sm">
-        Вбудований варіант Nuxt — коли кеш/інвалідація не потрібні.
+        Nuxt's built-in option — when cache/invalidation isn't needed.
       </p>
       <ul class="mt-3 space-y-1">
         <li v-for="article in articles" :key="article.article_id" class="text-sm">

@@ -26,7 +26,7 @@ async function copy() {
         class="text-xs rounded border border-border px-2 py-1 transition hover:border-brand-primary"
         @click="copy"
       >
-        {{ copied ? 'Скопійовано ✓' : 'Копіювати' }}
+        {{ copied ? 'Copied ✓' : 'Copy' }}
       </button>
     </div>
     <pre class="text-xs overflow-auto p-3 leading-relaxed"><code>{{ code }}</code></pre>

@@ -4,10 +4,10 @@ import { listPosts } from '~/repositories/example/posts'
 definePageMeta({
   hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Posts — useClientQuery',
-  subtitle: 'Той самий репозиторій, що й у формі створення, тепер як queryFn кешованого запиту.',
+  subtitle: 'The same repository as in the create form, now as the queryFn of a cached query.',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'Posts' },
   ],
 })
@@ -34,7 +34,7 @@ const { data: posts, isPending } = useClientQuery({
 <template>
   <div>
     <p v-if="isPending">
-      Завантаження…
+      Loading…
     </p>
     <ul v-else class="space-y-2">
       <li v-for="post in posts" :key="post.id">

@@ -2,10 +2,10 @@
 definePageMeta({
   hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Mutation + invalidate — useApiMutation',
-  subtitle: 'Додай закладку → список оновиться автоматично через invalidate: [[\'bookmarks\']]. Стор in-memory, лише для демо.',
+  subtitle: 'Add a bookmark → the list updates automatically via invalidate: [[\'bookmarks\']]. The store is in-memory, demo only.',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'Mutation + invalidate' },
   ],
 })

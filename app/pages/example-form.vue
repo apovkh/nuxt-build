@@ -3,12 +3,12 @@ import { rules } from '~/core/utils/validation'
 
 definePageMeta({
   hasCode: true, // 2-column grid already on SSR (see default.vue)
-  title: 'Demo: жива валідація',
-  subtitle: 'Помилки зʼявляються/зникають на blur і на submit. Той самий errors згодиться для Vuetify.',
+  title: 'Demo: live validation',
+  subtitle: 'Errors appear/disappear on blur and on submit. The same errors works for Vuetify too.',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
-    { title: 'Форма валідації' },
+    { title: 'Home', to: '/' },
+    { title: 'Validation form' },
   ],
 })
 
@@ -96,7 +96,7 @@ usePageCode([
 <template>
   <form class="space-y-4" @submit.prevent="send">
     <div>
-      <label class="block mb-1">Імʼя</label>
+      <label class="block mb-1">Name</label>
       <input v-model="form.name" type="text" class="border rounded px-3 py-2 w-full" @blur="validateField('name')">
       <p v-if="errors.name?.[0]" class="text-error text-sm mt-1">
         {{ errors.name[0] }}
@@ -112,7 +112,7 @@ usePageCode([
     </div>
 
     <div>
-      <label class="block mb-1">Пароль</label>
+      <label class="block mb-1">Password</label>
       <input v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" @blur="validateField('password')">
       <p v-if="errors.password?.[0]" class="text-error text-sm mt-1">
         {{ errors.password[0] }}
@@ -122,7 +122,7 @@ usePageCode([
     <div>
       <label class="inline-flex items-center gap-2">
         <input v-model="form.agree" type="checkbox" @change="validateField('agree')">
-        Погоджуюсь з умовами
+        I agree to the terms
       </label>
       <p v-if="errors.agree?.[0]" class="text-error text-sm mt-1">
         {{ errors.agree[0] }}
@@ -131,15 +131,15 @@ usePageCode([
 
     <div class="flex items-center gap-3">
       <button type="submit" :disabled="pending" class="bg-brand-primary text-white rounded px-4 py-2 disabled:opacity-50">
-        {{ pending ? 'Надсилаю…' : 'Зареєструватись' }}
+        {{ pending ? 'Sending…' : 'Sign up' }}
       </button>
       <button type="reset" class="bg-muted text-secondary rounded px-4 py-2">
-        Скинути
+        Reset
       </button>
     </div>
 
     <p v-if="success" class="text-success">
-      Успішно надіслано ✓
+      Sent successfully ✓
     </p>
   </form>
 </template>

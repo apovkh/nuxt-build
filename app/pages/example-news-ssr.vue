@@ -1,13 +1,13 @@
 <script setup lang="ts">
 definePageMeta({
   title: 'SSR + cache — useServerQuery',
-  subtitle: 'ssr: true · дані фетчаться на сервері й приходять у початковому HTML. Перевір view-source: заголовки вже там.',
+  subtitle: 'ssr: true · data is fetched on the server and arrives in the initial HTML. Check view-source: the titles are already there.',
   maxWidth: 'max-w-[1600px]',
   // Static flag: the layout draws the 2-column grid already on SSR (see default.vue),
   // so there is no 1→2 column jump after hydration. Pairs with usePageCode below.
   hasCode: true,
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'SSR + cache' },
   ],
 })

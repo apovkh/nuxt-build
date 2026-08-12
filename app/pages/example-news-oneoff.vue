@@ -4,10 +4,10 @@ import type { Article } from '#shared/types/example/news'
 definePageMeta({
   hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'One-off request — useApi',
-  subtitle: 'Запит виконується лише за кліком, результат не кешується (перезавантаж сторінку — дані зникнуть).',
+  subtitle: 'The request runs only on click; the result is not cached (reload the page — the data disappears).',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'One-off request' },
   ],
 })

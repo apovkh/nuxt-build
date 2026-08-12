@@ -2,10 +2,10 @@
 definePageMeta({
   hasCode: true, // 2-column grid already on SSR (see default.vue)
   title: 'Client cache — useClientQuery',
-  subtitle: 'ssr: false · у view-source даних немає — вони підвантажуються запитом у браузері (вкладка Network).',
+  subtitle: 'ssr: false · view-source has no data — it is loaded by a request in the browser (Network tab).',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'Client cache' },
   ],
 })

@@ -5,12 +5,12 @@ import { rules } from '~/core/utils/validation'
 
 definePageMeta({
   hasCode: true, // 2-column grid already on SSR (see default.vue)
-  title: 'Обробка помилок — різні типи запитів',
-  subtitle: 'Єдиний пайплайн: normalizeApiError → handleGlobalApiError → notifier (toast) + локальний useApiError для гілок по статусу. Нижче — як помилка спливає у кожному типі запиту.',
+  title: 'Error handling — different request types',
+  subtitle: 'A single pipeline: normalizeApiError → handleGlobalApiError → notifier (toast) + local useApiError for status-based branching. Below — how an error surfaces in each request type.',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
-    { title: 'Обробка помилок' },
+    { title: 'Home', to: '/' },
+    { title: 'Error handling' },
   ],
 })
 
@@ -122,7 +122,7 @@ const {
 
 usePageCode([
   {
-    title: 'Пайплайн (ядро)',
+    title: 'Pipeline (core)',
     code: `// normalizeApiError: anything → { statusCode, message, data }
 // handleGlobalApiError: normalize → log → notifier (toast).
 // Called globally from the TanStack cache and from useApi.
@@ -158,7 +158,7 @@ const { mutate, error } = useApiMutation({
 })`,
   },
   {
-    title: '4 · useForm (422 → поля)',
+    title: '4 · useForm (422 → fields)',
     code: `// The same errors: client-side rules + server-side 422
 const { form, errors, send, validateField } = useForm(
   () => demo.request(422), // the server returns [[field, rule, params]]
@@ -198,8 +198,8 @@ const { form, errors, send, validateField } = useForm(
           1 · One-off — <code class="text-brand-primary">useApi</code> + <code class="text-brand-primary">useApiError</code>
         </h2>
         <p class="mt-1 text-sm text-secondary">
-          Клік → запит з обраним статусом. useApi нотифікує глобально (toast) і кидає далі;
-          useApiError нормалізує у локальний стан і дає гілки по статусу.
+          Click → a request with the chosen status. useApi notifies globally (toast) and re-throws;
+          useApiError normalizes into local state and provides status-based branches.
         </p>
 
         <div class="mt-3 flex flex-wrap gap-2">
@@ -226,7 +226,7 @@ const { form, errors, send, validateField } = useForm(
           </div>
         </div>
         <p v-else class="mt-4 text-sm text-secondary">
-          Ще немає помилки — натисни статус вище.
+          No error yet — click a status above.
         </p>
       </section>
 
@@ -236,8 +236,8 @@ const { form, errors, send, validateField } = useForm(
           2 · Cached query — <code class="text-brand-primary">useClientQuery</code>
         </h2>
         <p class="mt-1 text-sm text-secondary">
-          Помилка живе в reactive <code>error</code> запиту; глобальний toast прилітає з
-          TanStack cache (<code>vue-query</code> onError). Статус: 500.
+          The error lives in the query's reactive <code>error</code>; the global toast comes from
+          the TanStack cache (<code>vue-query</code> onError). Status: 500.
         </p>
 
         <button
@@ -246,7 +246,7 @@ const { form, errors, send, validateField } = useForm(
           :disabled="queryFetching"
           @click="runQuery"
         >
-          {{ queryFetching ? 'Fetching…' : 'Запустити запит (500)' }}
+          {{ queryFetching ? 'Fetching…' : 'Run the query (500)' }}
         </button>
 
         <div v-if="queryErrorInfo" class="mt-4 rounded border border-error/30 bg-error/10 p-3 text-sm">
@@ -254,7 +254,7 @@ const { form, errors, send, validateField } = useForm(
           <div><span class="text-secondary">error.message:</span> {{ queryErrorInfo.message }}</div>
         </div>
         <p v-else-if="queryStarted && !queryFetching" class="mt-4 text-sm text-secondary">
-          Без помилки.
+          No error.
         </p>
       </section>
 
@@ -264,8 +264,8 @@ const { form, errors, send, validateField } = useForm(
           3 · Mutation — <code class="text-brand-primary">useApiMutation</code>
         </h2>
         <p class="mt-1 text-sm text-secondary">
-          POST-мутація; помилка в <code>error</code> мутації, глобально нотифікує
-          <code>onError</code> кешу мутацій. Статус: 500.
+          A POST mutation; the error is in the mutation's <code>error</code>, the mutation
+          cache's <code>onError</code> notifies globally. Status: 500.
         </p>
 
         <button
@@ -274,7 +274,7 @@ const { form, errors, send, validateField } = useForm(
           :disabled="mutationPending"
           @click="runMutation()"
         >
-          {{ mutationPending ? 'Sending…' : 'Виконати мутацію (500)' }}
+          {{ mutationPending ? 'Sending…' : 'Run the mutation (500)' }}
         </button>
 
         <div v-if="mutationErrorInfo" class="mt-4 rounded border border-error/30 bg-error/10 p-3 text-sm">
@@ -286,12 +286,12 @@ const { form, errors, send, validateField } = useForm(
       <!-- 4) Form -->
       <section class="rounded border border-border p-4">
         <h2 class="font-medium">
-          4 · Form — <code class="text-brand-primary">useForm</code> (серверна валідація)
+          4 · Form — <code class="text-brand-primary">useForm</code> (server-side validation)
         </h2>
         <p class="mt-1 text-sm text-secondary">
-          Поля валідні для клієнта → запит доходить до сервера, який повертає 422. useForm мапить
-          <code>[field, rule, params]</code> у <code>errors</code> без змін (тут валиться email).
-          Без toast — валідація не йде в глобальний хендлер.
+          The fields pass client validation → the request reaches the server, which returns 422.
+          useForm maps <code>[field, rule, params]</code> into <code>errors</code> unchanged (email
+          fails here). No toast — validation doesn't go through the global handler.
         </p>
 
         <form class="mt-3 max-w-sm space-y-3" @submit.prevent="submitLogin">
@@ -308,7 +308,7 @@ const { form, errors, send, validateField } = useForm(
             </p>
           </div>
           <div>
-            <label class="mb-1 block text-sm">Пароль</label>
+            <label class="mb-1 block text-sm">Password</label>
             <input
               v-model="loginForm.password"
               type="password"
@@ -324,10 +324,10 @@ const { form, errors, send, validateField } = useForm(
             class="rounded bg-brand-primary px-4 py-2 text-sm text-white disabled:opacity-50"
             :disabled="loginPending"
           >
-            {{ loginPending ? 'Надсилаю…' : 'Увійти (отримати 422)' }}
+            {{ loginPending ? 'Sending…' : 'Sign in (get a 422)' }}
           </button>
           <p v-if="loginSuccess" class="text-sm text-success">
-            Успішно ✓
+            Success ✓
           </p>
         </form>
       </section>
@@ -335,16 +335,16 @@ const { form, errors, send, validateField } = useForm(
       <!-- Notes -->
       <section class="rounded border border-border bg-muted/40 p-4 text-sm">
         <h2 class="font-medium">
-          Особливі статуси
+          Special statuses
         </h2>
         <ul class="mt-2 list-disc space-y-1 pl-5 text-secondary">
           <li>
-            <b>401</b> → <code>createHttp.onResponseError</code> робить авторедірект на <NuxtLink to="/example-login" class="text-brand-primary">
+            <b>401</b> → <code>createHttp.onResponseError</code> auto-redirects to <NuxtLink to="/example-login" class="text-brand-primary">
               /example-login
-            </NuxtLink> (тому його немає серед кнопок).
+            </NuxtLink> (which is why it's not among the buttons).
           </li>
-          <li><b>422</b> у формах → <code>useForm</code> розкладає у помилки полів; решта помилок форми йдуть у глобальний хендлер.</li>
-          <li>Тихий режим для конкретного запиту — <code>meta: { silent: true }</code> у його опціях.</li>
+          <li><b>422</b> in forms → <code>useForm</code> unpacks it into field errors; other form errors go to the global handler.</li>
+          <li>Silent mode for a specific request — <code>meta: { silent: true }</code> in its options.</li>
         </ul>
       </section>
     </div>

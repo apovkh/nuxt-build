@@ -7,7 +7,7 @@ definePageMeta({
   title: 'Enter to site',
   maxWidth: 'max-w-[1600px]',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'Login' },
   ],
 })

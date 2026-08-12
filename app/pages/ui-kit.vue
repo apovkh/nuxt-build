@@ -60,7 +60,7 @@ const headers = [
         hint="We never share this"
         required
         :counter="20"
-        :error-messages="text.length > 20 ? ['Максимум 20 символів'] : []"
+        :error-messages="text.length > 20 ? ['Maximum 20 characters'] : []"
       />
       <UITextarea v-model="area" label="Notes" :counter="100" />
       <UISelect

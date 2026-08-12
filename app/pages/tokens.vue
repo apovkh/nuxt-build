@@ -21,9 +21,9 @@ import {
 
 definePageMeta({
   title: 'Design tokens',
-  subtitle: 'Кольори й типографіка з ~/core/tokens — одне джерело для Vuetify і Tailwind.',
+  subtitle: 'Colors and typography from ~/core/tokens — a single source for Vuetify and Tailwind.',
   breadcrumbs: [
-    { title: 'Головна', to: '/' },
+    { title: 'Home', to: '/' },
     { title: 'Design tokens' },
   ],
 })
@@ -49,11 +49,11 @@ function toSwatches(group: Record<string, string>): Swatch[] {
 }
 
 const colorGroups = [
-  { title: 'Base', note: 'абсолютні значення — однакові в будь-якій темі', tokens: toSwatches(BASE_COLORS) },
-  { title: 'Brand', note: 'фіксована айдентика — навмисно НЕ перемикається в темній', tokens: toSwatches(BRAND_COLORS) },
-  { title: 'Status', note: 'семантика стану; ці імена читає сам Vuetify (валідація, алерти)', tokens: toSwatches(STATUS_COLORS) },
-  { title: 'Text', note: 'чорнило поверх поверхонь — ключі без префікса, тож клас читається як text-primary', tokens: toSwatches(TEXT_COLORS) },
-  { title: 'Surface', note: 'поверхні й лінії — перемикаються в темній', tokens: toSwatches(SURFACE_COLORS) },
+  { title: 'Base', note: 'absolute values — the same in any theme', tokens: toSwatches(BASE_COLORS) },
+  { title: 'Brand', note: 'fixed brand identity — deliberately does NOT flip in dark mode', tokens: toSwatches(BRAND_COLORS) },
+  { title: 'Status', note: 'state semantics; Vuetify itself reads these names (validation, alerts)', tokens: toSwatches(STATUS_COLORS) },
+  { title: 'Text', note: 'ink on top of surfaces — keys have no prefix, so the class reads as text-primary', tokens: toSwatches(TEXT_COLORS) },
+  { title: 'Surface', note: 'surfaces and lines — flip in dark mode', tokens: toSwatches(SURFACE_COLORS) },
 ]
 
 function swatchStyle(name: string) {
@@ -63,15 +63,15 @@ function swatchStyle(name: string) {
 // Classes here are string literals because Tailwind scans the source code: a dynamic
 // `text-${name}` would never make it into the build.
 const textColors = [
-  { cls: 'text-primary', note: 'заголовки, основний текст' },
-  { cls: 'text-secondary', note: 'підписи, hint, вторинний текст' },
-  { cls: 'text-brand-primary', note: 'лінки та дія' },
-  { cls: 'text-error', note: 'помилки валідації' },
-  { cls: 'text-success', note: 'успішний стан' },
-  { cls: 'text-warning', note: 'попередження' },
-  { cls: 'text-info', note: 'нейтральна підказка' },
-  { cls: 'text-brand-secondary', note: 'бренд — у темній лишається темним' },
-  { cls: 'text-brand-accent-600', note: 'акцент / CTA' },
+  { cls: 'text-primary', note: 'headings, body text' },
+  { cls: 'text-secondary', note: 'captions, hints, secondary text' },
+  { cls: 'text-brand-primary', note: 'links and actions' },
+  { cls: 'text-error', note: 'validation errors' },
+  { cls: 'text-success', note: 'success state' },
+  { cls: 'text-warning', note: 'warnings' },
+  { cls: 'text-info', note: 'neutral hint' },
+  { cls: 'text-brand-secondary', note: 'brand — stays dark in dark mode' },
+  { cls: 'text-brand-accent-600', note: 'accent / CTA' },
 ]
 
 // The scale Tailwind exposes (tokens/typography → aggregate `typography`).
@@ -111,15 +111,15 @@ const titles = Object.entries(TITLE).map(([level, preset]) => ({
   },
 }))
 
-const sample = 'Швидка руда лисиця 0123'
+const sample = 'The quick brown fox 0123'
 </script>
 
 <template>
   <div class="flex flex-col gap-10">
     <div class="flex items-center justify-between gap-4">
       <p class="text-sm text-secondary">
-        Тема: <b class="text-primary">{{ isDark ? 'dark' : 'light' }}</b> — перемкни, щоб побачити,
-        які токени фліпаються, а які лишаються собою.
+        Theme: <b class="text-primary">{{ isDark ? 'dark' : 'light' }}</b> — toggle it to see
+        which tokens flip and which stay the same.
       </p>
       <UIBtn variant="outlined" size="small" @click="theme.toggle()">
         <UIIcon :icon="isDark ? mdiWeatherSunny : mdiWeatherNight" start size="small" />
@@ -168,10 +168,10 @@ const sample = 'Швидка руда лисиця 0123'
     <section class="flex flex-col gap-3">
       <div>
         <h2 class="text-lg font-semibold text-primary">
-          Текст — кольори
+          Text — colors
         </h2>
         <p class="text-sm text-secondary">
-          Ті самі токени, але вже класами Tailwind поверх поточної теми.
+          The same tokens, now as Tailwind classes on top of the current theme.
         </p>
       </div>
 
@@ -188,10 +188,10 @@ const sample = 'Швидка руда лисиця 0123'
     <section class="flex flex-col gap-3">
       <div>
         <h2 class="text-lg font-semibold text-primary">
-          Текст — розміри
+          Text — sizes
         </h2>
         <p class="text-sm text-secondary">
-          Ліворуч — шкала Tailwind (base 16px), праворуч — DS-шкала з FONT_SIZE (base 14px).
+          Left — the Tailwind scale (base 16px), right — the DS scale from FONT_SIZE (base 14px).
         </p>
       </div>
 
@@ -219,7 +219,7 @@ const sample = 'Швидка руда лисиця 0123'
     <!-- ── Text: weights ────────────────────────────────────────────────── -->
     <section class="flex flex-col gap-3">
       <h2 class="text-lg font-semibold text-primary">
-        Текст — насиченість
+        Text — weights
       </h2>
       <ul class="flex flex-col gap-2 rounded border border-border bg-surface p-4">
         <li v-for="item in weights" :key="item.cls" class="flex items-baseline gap-3">
@@ -234,10 +234,10 @@ const sample = 'Швидка руда лисиця 0123'
     <section class="flex flex-col gap-3">
       <div>
         <h2 class="text-lg font-semibold text-primary">
-          Заголовки
+          Headings
         </h2>
         <p class="text-sm text-secondary">
-          Пресети TITLE: розмір + вага + гарнітура + трекінг на кожен рівень.
+          TITLE presets: size + weight + typeface + tracking per level.
         </p>
       </div>
 
