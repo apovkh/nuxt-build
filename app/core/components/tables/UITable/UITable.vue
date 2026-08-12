@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<{
   items: () => [],
   headers: () => [],
   isLoading: false,
-  noDataText: 'Немає даних',
+  noDataText: 'No data',
   showSelect: false,
   showExpand: false,
   showPagination: true,
@@ -298,7 +298,7 @@ watch([showSelect, groupBy, showExpand], () => {
         <VExpandTransition>
           <UIEmptyState v-if="!isLoading" class="ui-table__no-data">
             <template v-if="searchValue">
-              <span>Немає результатів для <span class="font-bold">"{{ searchValue }}"</span></span>
+              <span>No results for <span class="font-bold">"{{ searchValue }}"</span></span>
             </template>
             <template v-else>
               {{ noDataText }}

@@ -2,23 +2,23 @@ type Params = Record<string, any>
 
 // Default validation messages. Easily swappable for vue-i18n later (t('$validation.<key>')).
 const MESSAGES: Record<string, (p?: Params) => string> = {
-  required: () => 'Обовʼязкове поле',
-  requiredWithoutTrim: () => 'Обовʼязкове поле',
-  agree: () => 'Потрібна згода',
-  email: () => 'Некоректний email',
-  emailTaken: () => 'Ця пошта вже зареєстрована',
-  invalidCredentials: () => 'Невірний email або пароль',
-  invalidResetToken: () => 'Посилання недійсне або застаріло. Запросіть нове.',
-  phoneNumber: () => 'Некоректний номер телефону',
-  maxLength: p => `Максимум ${p?.max} символів`,
-  minLength: p => `Мінімум ${p?.min} символів`,
-  minNumber: p => `Мінімум ${p?.min}`,
-  maxNumber: p => `Максимум ${p?.max}`,
-  minMaxNumber: p => `Від ${p?.min} до ${p?.max}`,
-  twoDecimals: () => 'Не більше 2 знаків після коми',
-  noDecimals: () => 'Тільки цілі числа',
-  onlyUniqSymbols: () => 'Символи мають бути унікальними',
-  unique: () => 'Таке значення вже додано',
+  required: () => 'Required field',
+  requiredWithoutTrim: () => 'Required field',
+  agree: () => 'Consent is required',
+  email: () => 'Invalid email',
+  emailTaken: () => 'This email is already registered',
+  invalidCredentials: () => 'Invalid email or password',
+  invalidResetToken: () => 'The link is invalid or has expired. Request a new one.',
+  phoneNumber: () => 'Invalid phone number',
+  maxLength: p => `Maximum ${p?.max} characters`,
+  minLength: p => `Minimum ${p?.min} characters`,
+  minNumber: p => `Minimum ${p?.min}`,
+  maxNumber: p => `Maximum ${p?.max}`,
+  minMaxNumber: p => `From ${p?.min} to ${p?.max}`,
+  twoDecimals: () => 'No more than 2 decimal places',
+  noDecimals: () => 'Whole numbers only',
+  onlyUniqSymbols: () => 'Characters must be unique',
+  unique: () => 'This value has already been added',
 }
 
 // Positional parameter names for the 422 contract: the backend sends params as an array
@@ -43,5 +43,5 @@ export function tValidation(
 ): string {
   const named = Array.isArray(params) ? toNamedParams(key, params) : params as Params | undefined
 
-  return MESSAGES[key]?.(named) ?? 'Некоректне значення'
+  return MESSAGES[key]?.(named) ?? 'Invalid value'
 }

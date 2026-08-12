@@ -9,7 +9,7 @@ export function normalizeApiError(error: unknown): ApiError {
   if (err?.response || err?.statusCode) {
     return {
       statusCode: err.statusCode ?? err.response?.status ?? 0,
-      message: err.data?.message ?? err.statusMessage ?? err.message ?? 'Помилка запиту',
+      message: err.data?.message ?? err.statusMessage ?? err.message ?? 'Request error',
       data: err.data,
     }
   }
@@ -18,7 +18,7 @@ export function normalizeApiError(error: unknown): ApiError {
     return { statusCode: 0, message: err.message }
   }
 
-  return { statusCode: 0, message: 'Невідома помилка' }
+  return { statusCode: 0, message: 'Unknown error' }
 }
 
 // Reactive API error handling for components/forms.
