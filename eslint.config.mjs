@@ -1,6 +1,6 @@
 // @ts-check
-// Лінтер-сетап бази: antfu-пресет + Nuxt.
-// У nuxt.config обов'язково: modules: ['@nuxt/eslint'] + eslint: { config: { standalone: false } }.
+// Base linter setup: antfu preset + Nuxt.
+// Required in nuxt.config: modules: ['@nuxt/eslint'] + eslint: { config: { standalone: false } }.
 import antfu from '@antfu/eslint-config'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
@@ -14,13 +14,13 @@ export default withNuxt(
   {
     rules: {
       'no-console': 'off',
-      // process/Buffer у server-коді — штатні Node API (env читається у nuxt.config і воркерах).
+      // process/Buffer in server code are standard Node APIs (env is read in nuxt.config and workers).
       'node/prefer-global/process': 'off',
       'node/prefer-global/buffer': 'off',
-      // Мікрооптимізація regex не варта шуму.
+      // Regex micro-optimization is not worth the noise.
       'e18e/prefer-static-regex': 'off',
       'no-alert': 'off',
-      // Не даємо лінтеру диктувати pnpm-налаштування — це поведінка, а не стиль.
+      // Don't let the linter dictate pnpm settings — that's behavior, not style.
       'pnpm/yaml-enforce-settings': 'off',
       'vue/component-name-in-template-casing': [
         'error',
